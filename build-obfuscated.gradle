@@ -1,0 +1,99 @@
+plugins {
+	id 'net.fabricmc.fabric-loom-remap' version "${loomVersion}"
+	id 'maven-publish'
+}
+
+version = "${project.modVersion}+${stonecutter.current.version}"
+group = project.mavenGroup
+
+base {
+	archivesName = project.modId
+}
+
+repositories {
+	maven {
+		name = 'Terraformers'
+		url = 'https://maven.terraformersmc.com/releases/'
+	}
+	maven {
+		name = 'isXander'
+		url = 'https://maven.isxander.dev/releases/'
+	}
+	maven {
+		name = 'shedaniel'
+		url = 'https://maven.shedaniel.me/'
+	}
+	maven {
+		name = 'Modrinth'
+		url = 'https://api.modrinth.com/maven'
+		content {
+			includeGroup 'maven.modrinth'
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${stonecutter.current.version}"
+	mappings loom.officialMojangMappings()
+	modImplementation "net.fabricmc:fabric-loader:${project.loaderVersion}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabricApiVersion}"
+
+	modImplementation "com.terraformersmc:modmenu:${project.modMenuVersion}"
+
+	modCompileOnly "dev.isxander:yet-another-config-lib:${project.yaclVersion}"
+	modLocalRuntime "dev.isxander:yet-another-config-lib:${project.yaclVersion}"
+
+	modCompileOnly "me.shedaniel.cloth:cloth-config-fabric:${project.clothConfigVersion}"
+	modLocalRuntime "me.shedaniel.cloth:cloth-config-fabric:${project.clothConfigVersion}"
+
+	modCompileOnly "maven.modrinth:midnightlib:${project.midnightlibVersion}"
+	modLocalRuntime "maven.modrinth:midnightlib:${project.midnightlibVersion}"
+}
+
+processResources {
+	def version = project.version
+	def minecraftDep = project.minecraftDep
+	def javaVersion = project.javaVersion
+	inputs.property "version", version
+	inputs.property "minecraftDep", minecraftDep
+	inputs.property "javaVersion", javaVersion
+
+	filesMatching("fabric.mod.json") {
+		expand "version": version, "minecraftDep": minecraftDep, "javaVersion": javaVersion
+	}
+
+	filesMatching("configsearch.mixins.json") {
+		expand "javaVersion": javaVersion
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = Integer.parseInt(project.javaVersion)
+}
+
+java {
+	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.toVersion(project.javaVersion)
+	targetCompatibility = JavaVersion.toVersion(project.javaVersion)
+}
+
+jar {
+	def projectName = project.name
+	inputs.property "projectName", projectName
+
+	from(rootProject.file("LICENSE")) {
+		rename { "${it}_$projectName" }
+	}
+}
+
+publishing {
+	publications {
+		create("mavenJava", MavenPublication) {
+			from components.java
+		}
+	}
+
+	repositories {
+	}
+}

@@ -3,8 +3,12 @@ plugins {
 	id 'maven-publish'
 }
 
-version = project.modVersion
+version = "${project.modVersion}+${stonecutter.current.version}"
 group = project.mavenGroup
+
+base {
+	archivesName = project.modId
+}
 
 repositories {
 	maven {
@@ -29,7 +33,7 @@ repositories {
 }
 
 dependencies {
-	minecraft "com.mojang:minecraft:${project.minecraftVersion}"
+	minecraft "com.mojang:minecraft:${stonecutter.current.version}"
 	implementation "net.fabricmc:fabric-loader:${project.loaderVersion}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabricApiVersion}"
 
@@ -47,29 +51,37 @@ dependencies {
 
 processResources {
 	def version = project.version
+	def minecraftDep = project.minecraftDep
+	def javaVersion = project.javaVersion
 	inputs.property "version", version
+	inputs.property "minecraftDep", minecraftDep
+	inputs.property "javaVersion", javaVersion
 
 	filesMatching("fabric.mod.json") {
-		expand "version": version
+		expand "version": version, "minecraftDep": minecraftDep, "javaVersion": javaVersion
+	}
+
+	filesMatching("configsearch.mixins.json") {
+		expand "javaVersion": javaVersion
 	}
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 25
+	it.options.release = Integer.parseInt(project.javaVersion)
 }
 
 java {
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_25
-	targetCompatibility = JavaVersion.VERSION_25
+	sourceCompatibility = JavaVersion.toVersion(project.javaVersion)
+	targetCompatibility = JavaVersion.toVersion(project.javaVersion)
 }
 
 jar {
 	def projectName = project.name
 	inputs.property "projectName", projectName
 
-	from("LICENSE") {
+	from(rootProject.file("LICENSE")) {
 		rename { "${it}_$projectName" }
 	}
 }
