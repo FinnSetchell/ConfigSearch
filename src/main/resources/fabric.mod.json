@@ -14,6 +14,9 @@
 	"entrypoints": {
 		"client": [
 			"dev.finndog.configsearch.ConfigSearchClient"
+		],
+		"modmenu": [
+			"dev.finndog.configsearch.compat.ModMenuEntry"
 		]
 	},
 	"mixins": [

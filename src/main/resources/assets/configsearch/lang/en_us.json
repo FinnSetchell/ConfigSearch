@@ -1,3 +1,9 @@
 {
-	"configsearch.result.screen_only": "Opens this mod's config screen"
+	"configsearch.button": "⌕",
+	"configsearch.button.tooltip": "Search mod configs",
+	"configsearch.result.screen_only": "Opens this mod's config screen",
+	"configsearch.screen.empty": "No matching options",
+	"configsearch.screen.hint": "Search all mod config options...",
+	"configsearch.screen.stats": "%s options from %s mods",
+	"configsearch.screen.title": "Config Search"
 }
