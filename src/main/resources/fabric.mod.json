@@ -1,0 +1,29 @@
+{
+	"schemaVersion": 1,
+	"id": "configsearch",
+	"version": "${version}",
+	"name": "Config Search",
+	"description": "Search every mod's config options from one search bar in Mod Menu.",
+	"authors": [
+		"FinnDog"
+	],
+	"contact": {},
+	"license": "LGPL-3.0-only",
+	"icon": "assets/configsearch/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"dev.finndog.configsearch.ConfigSearchClient"
+		]
+	},
+	"mixins": [
+		"configsearch.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*",
+		"modmenu": "*"
+	}
+}

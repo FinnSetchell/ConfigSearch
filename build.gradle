@@ -1,0 +1,86 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loomVersion}"
+	id 'maven-publish'
+}
+
+version = project.modVersion
+group = project.mavenGroup
+
+repositories {
+	maven {
+		name = 'Terraformers'
+		url = 'https://maven.terraformersmc.com/releases/'
+	}
+	maven {
+		name = 'isXander'
+		url = 'https://maven.isxander.dev/releases/'
+	}
+	maven {
+		name = 'shedaniel'
+		url = 'https://maven.shedaniel.me/'
+	}
+	maven {
+		name = 'Modrinth'
+		url = 'https://api.modrinth.com/maven'
+		content {
+			includeGroup 'maven.modrinth'
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraftVersion}"
+	implementation "net.fabricmc:fabric-loader:${project.loaderVersion}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabricApiVersion}"
+
+	implementation "com.terraformersmc:modmenu:${project.modMenuVersion}"
+
+	compileOnly "dev.isxander:yet-another-config-lib:${project.yaclVersion}"
+	localRuntime "dev.isxander:yet-another-config-lib:${project.yaclVersion}"
+
+	compileOnly "me.shedaniel.cloth:cloth-config-fabric:${project.clothConfigVersion}"
+	localRuntime "me.shedaniel.cloth:cloth-config-fabric:${project.clothConfigVersion}"
+
+	compileOnly "maven.modrinth:midnightlib:${project.midnightlibVersion}"
+	localRuntime "maven.modrinth:midnightlib:${project.midnightlibVersion}"
+}
+
+processResources {
+	def version = project.version
+	inputs.property "version", version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 25
+}
+
+java {
+	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}
+
+jar {
+	def projectName = project.name
+	inputs.property "projectName", projectName
+
+	from("LICENSE") {
+		rename { "${it}_$projectName" }
+	}
+}
+
+publishing {
+	publications {
+		create("mavenJava", MavenPublication) {
+			from components.java
+		}
+	}
+
+	repositories {
+	}
+}
