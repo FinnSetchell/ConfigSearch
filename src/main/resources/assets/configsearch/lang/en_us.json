@@ -1,5 +1,4 @@
 {
-	"configsearch.button": "⌕",
 	"configsearch.button.tooltip": "Search mod configs",
 	"configsearch.result.screen_only": "Opens this mod's config screen",
 	"configsearch.screen.empty": "No matching options",
