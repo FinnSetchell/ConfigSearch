@@ -28,7 +28,7 @@ public final class ConfigSearchScreen extends Screen {
 	private static final Logger LOGGER = LoggerFactory.getLogger("configsearch");
 	private static final int LIST_TOP = 48;
 	private static final int LIST_BOTTOM_MARGIN = 36;
-	private static final int ROW_HEIGHT = 26;
+	private static final int ROW_HEIGHT = 36;
 	private static final int WHITE = 0xFFFFFFFF;
 	private static final int GRAY = 0xFFAAAAAA;
 
@@ -211,9 +211,39 @@ public final class ConfigSearchScreen extends Screen {
 
 	private final class ResultEntry extends ObjectSelectionList.Entry<ResultEntry> {
 		private final ConfigOptionEntry option;
+		private int cachedWidth = -1;
+		private List<String> cachedLines = List.of();
 
 		private ResultEntry(ConfigOptionEntry option) {
 			this.option = option;
+		}
+
+		private List<String> breadcrumbLines() {
+			int width = ConfigSearchScreen.this.resultsList.getRowWidth() - 4;
+			if (width == this.cachedWidth) {
+				return this.cachedLines;
+			}
+			var font = ConfigSearchScreen.this.font;
+			String text = this.option.breadcrumb().getString();
+			List<String> lines;
+			if (font.width(text) <= width) {
+				lines = List.of(text);
+			} else {
+				String first = font.plainSubstrByWidth(text, width);
+				int wordBreak = first.lastIndexOf(' ');
+				if (wordBreak > first.length() / 2) {
+					first = first.substring(0, wordBreak);
+				}
+				String rest = text.substring(first.length()).strip();
+				if (font.width(rest) <= width) {
+					lines = List.of(first, rest);
+				} else {
+					lines = List.of(first, font.plainSubstrByWidth(rest, width - font.width("...")) + "...");
+				}
+			}
+			this.cachedWidth = width;
+			this.cachedLines = lines;
+			return lines;
 		}
 
 		@Override
@@ -225,19 +255,28 @@ public final class ConfigSearchScreen extends Screen {
 		/*@Override
 		public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovered, float delta) {
 			graphics.text(ConfigSearchScreen.this.font, this.option.optionName(), this.getContentX() + 2, this.getContentY() + 1, WHITE);
-			graphics.text(ConfigSearchScreen.this.font, this.option.breadcrumb(), this.getContentX() + 2, this.getContentY() + 12, GRAY);
+			List<String> lines = this.breadcrumbLines();
+			for (int i = 0; i < lines.size(); i++) {
+				graphics.text(ConfigSearchScreen.this.font, Component.literal(lines.get(i)), this.getContentX() + 2, this.getContentY() + 12 + i * 10, GRAY);
+			}
 		}
 		*///?} else if >= 1.21.11 {
 		/*@Override
 		public void renderContent(GuiGraphics graphics, int mouseX, int mouseY, boolean hovered, float delta) {
 			graphics.drawString(ConfigSearchScreen.this.font, this.option.optionName(), this.getContentX() + 2, this.getContentY() + 1, WHITE);
-			graphics.drawString(ConfigSearchScreen.this.font, this.option.breadcrumb(), this.getContentX() + 2, this.getContentY() + 12, GRAY);
+			List<String> lines = this.breadcrumbLines();
+			for (int i = 0; i < lines.size(); i++) {
+				graphics.drawString(ConfigSearchScreen.this.font, lines.get(i), this.getContentX() + 2, this.getContentY() + 12 + i * 10, GRAY);
+			}
 		}
 		*///?} else {
 		@Override
 		public void render(GuiGraphics graphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovered, float delta) {
 			graphics.drawString(ConfigSearchScreen.this.font, this.option.optionName(), left + 2, top + 3, WHITE);
-			graphics.drawString(ConfigSearchScreen.this.font, this.option.breadcrumb(), left + 2, top + 14, GRAY);
+			List<String> lines = this.breadcrumbLines();
+			for (int i = 0; i < lines.size(); i++) {
+				graphics.drawString(ConfigSearchScreen.this.font, lines.get(i), left + 2, top + 14 + i * 10, GRAY);
+			}
 		}
 		//?}
 
