@@ -13,6 +13,7 @@ The same screen is also reachable through Config Search's own config button in M
 - YetAnotherConfigLib (YACL) 3.x
 - Cloth Config
 - MidnightLib
+- Forge Config API Port (1.21.1+ only)
 
 Mods using other config libraries or hand-written config screens still show up as a single result that opens their config screen.
 

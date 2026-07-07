@@ -1,6 +1,9 @@
 package dev.finndog.configsearch.index;
 
 import dev.finndog.configsearch.api.ScreenOptionExtractor;
+//? if >= 1.21.1 {
+import dev.finndog.configsearch.integration.forgeconfigapiport.ForgeConfigApiPortExtractor;
+//?}
 import dev.finndog.configsearch.integration.cloth.ClothConfigExtractor;
 import dev.finndog.configsearch.integration.midnightlib.MidnightLibExtractor;
 import dev.finndog.configsearch.integration.yacl.YaclExtractor;
@@ -24,6 +27,11 @@ public final class BuiltinExtractors {
 		if (loader.isModLoaded("midnightlib")) {
 			extractors.add(new MidnightLibExtractor());
 		}
+		//? if >= 1.21.1 {
+		if (loader.isModLoaded("forgeconfigapiport")) {
+			extractors.add(new ForgeConfigApiPortExtractor());
+		}
+		//?}
 		return List.copyOf(extractors);
 	}
 }

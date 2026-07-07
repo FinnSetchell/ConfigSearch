@@ -30,6 +30,7 @@ repositories {
 			includeGroup 'maven.modrinth'
 		}
 	}
+	mavenCentral()
 }
 
 dependencies {
@@ -48,6 +49,12 @@ dependencies {
 
 	modCompileOnly "maven.modrinth:midnightlib:${project.midnightlibVersion}"
 	modLocalRuntime "maven.modrinth:midnightlib:${project.midnightlibVersion}"
+
+	if (project.fcapVersion) {
+		modCompileOnly "maven.modrinth:forge-config-api-port:${project.fcapVersion}"
+		modLocalRuntime "maven.modrinth:forge-config-api-port:${project.fcapVersion}"
+		compileOnly "com.electronwill.night-config:core:${project.nightConfigVersion}"
+	}
 }
 
 processResources {
