@@ -14,6 +14,7 @@ The same screen is also reachable through Config Search's own config button in M
 - Cloth Config
 - MidnightLib
 - Forge Config API Port (1.21.1+ only)
+- Configured (MrCrayfish, 1.20.1 to 1.21.11)
 
 Mods using other config libraries or hand-written config screens still show up as a single result that opens their config screen.
 

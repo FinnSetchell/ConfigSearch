@@ -30,6 +30,13 @@ repositories {
 			includeGroup 'maven.modrinth'
 		}
 	}
+	maven {
+		name = 'CurseMaven'
+		url = 'https://cursemaven.com'
+		content {
+			includeGroup 'curse.maven'
+		}
+	}
 	mavenCentral()
 }
 
@@ -54,6 +61,11 @@ dependencies {
 		modCompileOnly "maven.modrinth:forge-config-api-port:${project.fcapVersion}"
 		modLocalRuntime "maven.modrinth:forge-config-api-port:${project.fcapVersion}"
 		compileOnly "com.electronwill.night-config:core:${project.nightConfigVersion}"
+	}
+
+	if (project.configuredFileId) {
+		modCompileOnly "curse.maven:configured-457570:${project.configuredFileId}"
+		modLocalRuntime "curse.maven:configured-457570:${project.configuredFileId}"
 	}
 }
 
