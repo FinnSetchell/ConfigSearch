@@ -124,6 +124,9 @@ public final class OptionIndex {
 		Map<String, ConfigScreenFactory<?>> provided = new LinkedHashMap<>();
 		for (var container : loader.getEntrypointContainers("modmenu", ModMenuApi.class)) {
 			String providerId = container.getProvider().getMetadata().getId();
+			if (providerId.equals("configsearch")) {
+				continue;
+			}
 			try {
 				ModMenuApi api = container.getEntrypoint();
 				factories.putIfAbsent(providerId, api.getModConfigScreenFactory());

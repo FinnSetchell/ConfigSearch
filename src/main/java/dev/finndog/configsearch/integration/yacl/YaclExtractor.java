@@ -17,8 +17,12 @@ import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class YaclExtractor implements ScreenOptionExtractor {
+	private static final Logger LOGGER = LoggerFactory.getLogger("configsearch");
+
 	@Override
 	public boolean supports(Screen screen) {
 		return screen instanceof YACLScreen;
@@ -50,6 +54,7 @@ public final class YaclExtractor implements ScreenOptionExtractor {
 				}
 			}
 		} catch (Throwable t) {
+			LOGGER.warn("Failed to index YACL config screen for mod {}", context.mod().getMetadata().getId(), t);
 			return List.copyOf(entries);
 		}
 		return List.copyOf(entries);

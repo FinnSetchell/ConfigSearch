@@ -14,8 +14,12 @@ import me.shedaniel.clothconfig2.gui.entries.SubCategoryListEntry;
 import me.shedaniel.clothconfig2.gui.entries.TextListEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class ClothConfigExtractor implements ScreenOptionExtractor {
+	private static final Logger LOGGER = LoggerFactory.getLogger("configsearch");
+
 	@Override
 	public boolean supports(Screen screen) {
 		return screen instanceof AbstractConfigScreen;
@@ -41,6 +45,7 @@ public final class ClothConfigExtractor implements ScreenOptionExtractor {
 			}
 			return List.copyOf(entries);
 		} catch (Throwable t) {
+			LOGGER.warn("Failed to index Cloth Config screen for mod {}", context.mod().getMetadata().getId(), t);
 			return List.of();
 		}
 	}
