@@ -138,11 +138,10 @@ public final class OptionIndex {
 	}
 
 	private List<ConfigOptionEntry> extractFromScreen(String modId, IConfigScreenFactory factory, List<ScreenOptionExtractor> extractors) {
-		Optional<ModContainer> container = ModList.get().getModContainerById(modId);
-		if (container.isEmpty()) {
+		ModContainer modContainer = ModList.get().getModContainerById(modId).orElse(null);
+		if (modContainer == null) {
 			return List.of();
 		}
-		ModContainer modContainer = container.get();
 		ModInfo info = new ModInfo(modContainer.getModId(), modContainer.getModInfo().getDisplayName());
 		ScreenOpener opener = parent -> factory.createScreen(modContainer, parent);
 		try {

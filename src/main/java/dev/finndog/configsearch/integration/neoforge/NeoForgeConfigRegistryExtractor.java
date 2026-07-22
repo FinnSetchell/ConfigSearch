@@ -7,9 +7,11 @@ import dev.finndog.configsearch.api.GlobalOptionProvider;
 import dev.finndog.configsearch.api.ScreenOpener;
 import dev.finndog.configsearch.api.ScreenOptionExtractor;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
@@ -42,23 +44,41 @@ public final class NeoForgeConfigRegistryExtractor implements ScreenOptionExtrac
 	@Override
 	public List<ConfigOptionEntry> scanAll() {
 		List<ConfigOptionEntry> all = new ArrayList<>();
+		Map<String, List<ModConfig>> byMod = configsByModId();
 		for (ModContainer container : ModList.get().getSortedMods()) {
 			String modId = container.getModId();
-			Collection<ModConfig> configs = ModConfigs.getConfigSet(modId);
+			List<ModConfig> configs = byMod.get(modId);
 			if (configs == null || configs.isEmpty()) {
 				continue;
 			}
 			Component modName = Component.literal(container.getModInfo().getDisplayName());
 			ScreenOpener opener = parent -> new ConfigurationScreen(container, parent);
-			all.addAll(collectForMod(modId, modName, opener));
+			all.addAll(collectForMod(modId, modName, opener, configs));
 		}
 		return all;
 	}
 
+	private static Map<String, List<ModConfig>> configsByModId() {
+		Map<String, List<ModConfig>> byMod = new LinkedHashMap<>();
+		for (ModConfig.Type type : ModConfig.Type.values()) {
+			Set<ModConfig> set = ModConfigs.getConfigSet(type);
+			if (set == null) {
+				continue;
+			}
+			for (ModConfig config : set) {
+				byMod.computeIfAbsent(config.getModId(), id -> new ArrayList<>()).add(config);
+			}
+		}
+		return byMod;
+	}
+
 	private static List<ConfigOptionEntry> collectForMod(String modId, Component modName, ScreenOpener opener) {
+		return collectForMod(modId, modName, opener, configsByModId().get(modId));
+	}
+
+	private static List<ConfigOptionEntry> collectForMod(String modId, Component modName, ScreenOpener opener, List<ModConfig> configs) {
 		try {
 			List<ConfigOptionEntry> entries = new ArrayList<>();
-			Collection<ModConfig> configs = ModConfigs.getConfigSet(modId);
 			if (configs == null) {
 				return List.of();
 			}
