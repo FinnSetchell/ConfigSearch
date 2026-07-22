@@ -1,45 +1,35 @@
 package dev.finndog.configsearch.index;
 
 import dev.finndog.configsearch.api.ScreenOptionExtractor;
-//? if < 26.2 {
-import dev.finndog.configsearch.integration.configured.ConfiguredExtractor;
-//?}
-//? if >= 1.21.1 {
-import dev.finndog.configsearch.integration.forgeconfigapiport.ForgeConfigApiPortExtractor;
-//?}
 import dev.finndog.configsearch.integration.cloth.ClothConfigExtractor;
+import dev.finndog.configsearch.integration.configured.ConfiguredExtractor;
 import dev.finndog.configsearch.integration.midnightlib.MidnightLibExtractor;
+import dev.finndog.configsearch.integration.neoforge.NeoForgeConfigRegistryExtractor;
 import dev.finndog.configsearch.integration.yacl.YaclExtractor;
 import java.util.ArrayList;
 import java.util.List;
-import net.fabricmc.loader.api.FabricLoader;
+import net.neoforged.fml.ModList;
 
 public final class BuiltinExtractors {
 	private BuiltinExtractors() {
 	}
 
 	public static List<ScreenOptionExtractor> createAll() {
-		FabricLoader loader = FabricLoader.getInstance();
+		ModList loader = ModList.get();
 		List<ScreenOptionExtractor> extractors = new ArrayList<>();
-		if (loader.isModLoaded("yet_another_config_lib_v3")) {
+		extractors.add(new NeoForgeConfigRegistryExtractor());
+		if (loader.isLoaded("yet_another_config_lib_v3")) {
 			extractors.add(new YaclExtractor());
 		}
-		if (loader.isModLoaded("cloth-config")) {
+		if (loader.isLoaded("cloth_config")) {
 			extractors.add(new ClothConfigExtractor());
 		}
-		if (loader.isModLoaded("midnightlib")) {
+		if (loader.isLoaded("midnightlib")) {
 			extractors.add(new MidnightLibExtractor());
 		}
-		//? if >= 1.21.1 {
-		if (loader.isModLoaded("forgeconfigapiport")) {
-			extractors.add(new ForgeConfigApiPortExtractor());
-		}
-		//?}
-		//? if < 26.2 {
-		if (loader.isModLoaded("configured")) {
+		if (loader.isLoaded("configured")) {
 			extractors.add(new ConfiguredExtractor());
 		}
-		//?}
 		return List.copyOf(extractors);
 	}
 }

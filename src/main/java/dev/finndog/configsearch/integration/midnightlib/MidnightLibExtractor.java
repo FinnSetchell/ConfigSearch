@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import net.fabricmc.loader.api.FabricLoader;
+import net.neoforged.fml.ModList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
@@ -53,8 +53,8 @@ public final class MidnightLibExtractor implements ScreenOptionExtractor, Global
 		if (modid == null || config == null || config.configClass == null) {
 			return;
 		}
-		Component modName = FabricLoader.getInstance().getModContainer(modid)
-			.map(container -> Component.literal(container.getMetadata().getName()))
+		Component modName = ModList.get().getModContainerById(modid)
+			.map(container -> Component.literal(container.getModInfo().getDisplayName()))
 			.orElseGet(() -> Component.literal(modid));
 		ScreenOpener opener = parent -> MidnightConfig.getScreen(parent, modid);
 		for (Field field : config.configClass.getFields()) {

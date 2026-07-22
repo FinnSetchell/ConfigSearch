@@ -34,8 +34,8 @@ public final class ConfiguredExtractor implements ScreenOptionExtractor {
 	@Override
 	public List<ConfigOptionEntry> extract(ExtractionContext context) {
 		try {
-			String modId = context.mod().getMetadata().getId();
-			Component modName = Component.literal(context.mod().getMetadata().getName());
+			String modId = context.mod().id();
+			Component modName = Component.literal(context.mod().name());
 			ScreenOpener opener = context::freshScreen;
 			Screen screen = context.screen();
 			List<IModConfig> configs = new ArrayList<>();
@@ -65,7 +65,7 @@ public final class ConfiguredExtractor implements ScreenOptionExtractor {
 			}
 			return List.copyOf(entries);
 		} catch (Throwable t) {
-			LOGGER.warn("Failed to index Configured config for mod {}", context.mod().getMetadata().getId(), t);
+			LOGGER.warn("Failed to index Configured config for mod {}", context.mod().id(), t);
 			return List.of();
 		}
 	}

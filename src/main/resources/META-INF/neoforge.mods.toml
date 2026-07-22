@@ -1,0 +1,29 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "LGPL-3.0-only"
+issueTrackerURL = "https://github.com/FinnSetchell/ConfigSearch/issues"
+
+[[mods]]
+modId = "configsearch"
+version = "${version}"
+displayName = "Config Search"
+displayURL = "https://modrinth.com/mod/config-search"
+logoFile = "assets/configsearch/icon.png"
+authors = "FinnDog"
+description = '''
+Search every mod's config options from one search bar.
+'''
+
+[[dependencies.configsearch]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.configsearch]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraftDep}"
+ordering = "NONE"
+side = "CLIENT"

@@ -1,17 +1,20 @@
-package dev.finndog.configsearch.integration.forgeconfigapiport;
+package dev.finndog.configsearch.integration.neoforge;
 
-//? if >= 1.21.1 {
 import com.electronwill.nightconfig.core.UnmodifiableConfig;
 import dev.finndog.configsearch.api.ConfigOptionEntry;
 import dev.finndog.configsearch.api.ExtractionContext;
+import dev.finndog.configsearch.api.GlobalOptionProvider;
 import dev.finndog.configsearch.api.ScreenOpener;
 import dev.finndog.configsearch.api.ScreenOptionExtractor;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.config.ModConfigs;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
@@ -20,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class ForgeConfigApiPortExtractor implements ScreenOptionExtractor {
+public final class NeoForgeConfigRegistryExtractor implements ScreenOptionExtractor, GlobalOptionProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger("configsearch");
 
 	@Override
@@ -30,12 +33,36 @@ public final class ForgeConfigApiPortExtractor implements ScreenOptionExtractor 
 
 	@Override
 	public List<ConfigOptionEntry> extract(ExtractionContext context) {
+		String modId = context.mod().id();
+		Component modName = Component.literal(context.mod().name());
+		ScreenOpener opener = context::freshScreen;
+		return collectForMod(modId, modName, opener);
+	}
+
+	@Override
+	public List<ConfigOptionEntry> scanAll() {
+		List<ConfigOptionEntry> all = new ArrayList<>();
+		for (ModContainer container : ModList.get().getSortedMods()) {
+			String modId = container.getModId();
+			Collection<ModConfig> configs = ModConfigs.getConfigSet(modId);
+			if (configs == null || configs.isEmpty()) {
+				continue;
+			}
+			Component modName = Component.literal(container.getModInfo().getDisplayName());
+			ScreenOpener opener = parent -> new ConfigurationScreen(container, parent);
+			all.addAll(collectForMod(modId, modName, opener));
+		}
+		return all;
+	}
+
+	private static List<ConfigOptionEntry> collectForMod(String modId, Component modName, ScreenOpener opener) {
 		try {
-			String modId = context.mod().getMetadata().getId();
-			Component modName = Component.literal(context.mod().getMetadata().getName());
-			ScreenOpener opener = context::freshScreen;
 			List<ConfigOptionEntry> entries = new ArrayList<>();
-			for (ModConfig config : ModConfigs.getModConfigs(modId)) {
+			Collection<ModConfig> configs = ModConfigs.getConfigSet(modId);
+			if (configs == null) {
+				return List.of();
+			}
+			for (ModConfig config : configs) {
 				ModConfig.Type type = config.getType();
 				if (type != ModConfig.Type.CLIENT && type != ModConfig.Type.COMMON) {
 					continue;
@@ -48,7 +75,7 @@ public final class ForgeConfigApiPortExtractor implements ScreenOptionExtractor 
 			}
 			return List.copyOf(entries);
 		} catch (Throwable t) {
-			LOGGER.warn("Failed to index Forge Config API Port config for mod {}", context.mod().getMetadata().getId(), t);
+			LOGGER.warn("Failed to index NeoForge config for mod {}", modId, t);
 			return List.of();
 		}
 	}
@@ -105,9 +132,3 @@ public final class ForgeConfigApiPortExtractor implements ScreenOptionExtractor 
 		return List.copyOf(result);
 	}
 }
-//?} else {
-/*public final class ForgeConfigApiPortExtractor {
-	private ForgeConfigApiPortExtractor() {
-	}
-}
-*///?}

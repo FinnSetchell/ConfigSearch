@@ -13,7 +13,7 @@ import dev.isxander.yacl3.api.YetAnotherConfigLib;
 import dev.isxander.yacl3.gui.YACLScreen;
 import java.util.ArrayList;
 import java.util.List;
-import net.fabricmc.loader.api.metadata.ModMetadata;
+import dev.finndog.configsearch.api.ModInfo;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -33,9 +33,9 @@ public final class YaclExtractor implements ScreenOptionExtractor {
 		List<ConfigOptionEntry> entries = new ArrayList<>();
 		try {
 			YetAnotherConfigLib config = ((YACLScreen) context.screen()).config;
-			ModMetadata metadata = context.mod().getMetadata();
-			String modId = metadata.getId();
-			Component modName = Component.literal(metadata.getName());
+			ModInfo metadata = context.mod();
+			String modId = metadata.id();
+			Component modName = Component.literal(metadata.name());
 			for (ConfigCategory category : config.categories()) {
 				for (OptionGroup group : category.groups()) {
 					if (group instanceof ListOption<?> listOption) {
@@ -54,7 +54,7 @@ public final class YaclExtractor implements ScreenOptionExtractor {
 				}
 			}
 		} catch (Throwable t) {
-			LOGGER.warn("Failed to index YACL config screen for mod {}", context.mod().getMetadata().getId(), t);
+			LOGGER.warn("Failed to index YACL config screen for mod {}", context.mod().id(), t);
 			return List.copyOf(entries);
 		}
 		return List.copyOf(entries);

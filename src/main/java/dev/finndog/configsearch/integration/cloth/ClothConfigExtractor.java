@@ -31,8 +31,8 @@ public final class ClothConfigExtractor implements ScreenOptionExtractor {
 			if (!(context.screen() instanceof AbstractConfigScreen configScreen)) {
 				return List.of();
 			}
-			String modId = context.mod().getMetadata().getId();
-			Component modName = Component.literal(context.mod().getMetadata().getName());
+			String modId = context.mod().id();
+			Component modName = Component.literal(context.mod().name());
 			List<ConfigOptionEntry> entries = new ArrayList<>();
 			int categoryIndex = 0;
 			for (Map.Entry<Component, List<AbstractConfigEntry<?>>> category : configScreen.getCategorizedEntries().entrySet()) {
@@ -45,7 +45,7 @@ public final class ClothConfigExtractor implements ScreenOptionExtractor {
 			}
 			return List.copyOf(entries);
 		} catch (Throwable t) {
-			LOGGER.warn("Failed to index Cloth Config screen for mod {}", context.mod().getMetadata().getId(), t);
+			LOGGER.warn("Failed to index Cloth Config screen for mod {}", context.mod().id(), t);
 			return List.of();
 		}
 	}
