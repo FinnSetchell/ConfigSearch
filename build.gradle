@@ -1,0 +1,124 @@
+plugins {
+	id 'net.neoforged.moddev' version "${moddevVersion}"
+	id 'maven-publish'
+}
+
+version = "${project.modVersion}+${stonecutter.current.version}-neoforge"
+group = project.mavenGroup
+
+base {
+	archivesName = project.modId
+}
+
+repositories {
+	maven {
+		name = 'NeoForged'
+		url = 'https://maven.neoforged.net/releases'
+	}
+	maven {
+		name = 'isXander'
+		url = 'https://maven.isxander.dev/releases/'
+	}
+	maven {
+		name = 'shedaniel'
+		url = 'https://maven.shedaniel.me/'
+	}
+	maven {
+		name = 'Modrinth'
+		url = 'https://api.modrinth.com/maven'
+		content {
+			includeGroup 'maven.modrinth'
+		}
+	}
+	maven {
+		name = 'CurseMaven'
+		url = 'https://cursemaven.com'
+		content {
+			includeGroup 'curse.maven'
+		}
+	}
+	mavenCentral()
+}
+
+neoForge {
+	version = project.neoForgeVersion
+
+	parchment {
+		mappingsVersion = '2024.11.17'
+		minecraftVersion = '1.21.1'
+	}
+
+	runs {
+		client {
+			client()
+		}
+	}
+
+	mods {
+		configsearch {
+			sourceSet sourceSets.main
+		}
+	}
+}
+
+dependencies {
+	compileOnly "dev.isxander:yet-another-config-lib:${project.yaclVersion}"
+	runtimeOnly "dev.isxander:yet-another-config-lib:${project.yaclVersion}"
+
+	compileOnly "me.shedaniel.cloth:cloth-config-neoforge:${project.clothConfigVersion}"
+	runtimeOnly "me.shedaniel.cloth:cloth-config-neoforge:${project.clothConfigVersion}"
+
+	compileOnly "maven.modrinth:midnightlib:${project.midnightlibVersion}"
+	runtimeOnly "maven.modrinth:midnightlib:${project.midnightlibVersion}"
+
+	if (project.configuredFileId) {
+		compileOnly "curse.maven:configured-457570:${project.configuredFileId}"
+		runtimeOnly "curse.maven:configured-457570:${project.configuredFileId}"
+	}
+
+	compileOnly "com.electronwill.night-config:core:${project.nightConfigVersion}"
+}
+
+processResources {
+	def version = project.version
+	def minecraftDep = project.minecraftDep
+	def javaVersion = project.javaVersion
+	inputs.property 'version', version
+	inputs.property 'minecraftDep', minecraftDep
+	inputs.property 'javaVersion', javaVersion
+
+	filesMatching('META-INF/neoforge.mods.toml') {
+		expand 'version': version, 'minecraftDep': minecraftDep, 'javaVersion': javaVersion
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = Integer.parseInt(project.javaVersion)
+}
+
+java {
+	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.toVersion(project.javaVersion)
+	targetCompatibility = JavaVersion.toVersion(project.javaVersion)
+}
+
+jar {
+	def projectName = project.name
+	inputs.property 'projectName', projectName
+
+	from(rootProject.file('LICENSE')) {
+		rename { "${it}_$projectName" }
+	}
+}
+
+publishing {
+	publications {
+		create('mavenJava', MavenPublication) {
+			from components.java
+		}
+	}
+
+	repositories {
+	}
+}
