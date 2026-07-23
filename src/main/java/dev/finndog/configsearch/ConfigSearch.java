@@ -5,9 +5,7 @@ import dev.finndog.configsearch.gui.ConfigSearchScreen;
 /*import dev.finndog.configsearch.gui.IconButton;
 *///?}
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
 //? if >= 1.21.1 {
 import net.minecraft.client.gui.components.SpriteIconButton;
 //?}
@@ -15,6 +13,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ScreenEvent;
@@ -40,11 +39,7 @@ public final class ConfigSearch {
 		if (!(screen instanceof ModListScreen)) {
 			return;
 		}
-		EditBox searchBox = findSearchBox(event);
-		if (searchBox == null) {
-			return;
-		}
-		Button configButton = findButtonBelow(event, searchBox);
+		Button configButton = findButtonByKey(event, "fml.menu.mods.config");
 		if (configButton == null) {
 			return;
 		}
@@ -73,33 +68,16 @@ public final class ConfigSearch {
 		event.addListener(button);
 	}
 
-	private static EditBox findSearchBox(ScreenEvent.Init.Post event) {
-		for (GuiEventListener listener : event.getListenersList()) {
-			if (listener instanceof EditBox editBox) {
-				return editBox;
-			}
-		}
-		return null;
-	}
-
-	private static Button findButtonBelow(ScreenEvent.Init.Post event, AbstractWidget anchor) {
-		Button best = null;
-		int anchorBottom = anchor.getY() + anchor.getHeight();
-		int anchorX = anchor.getX();
+	private static Button findButtonByKey(ScreenEvent.Init.Post event, String translationKey) {
 		for (GuiEventListener listener : event.getListenersList()) {
 			if (!(listener instanceof Button candidate)) {
 				continue;
 			}
-			if (candidate.getX() != anchorX) {
-				continue;
-			}
-			if (candidate.getY() < anchorBottom) {
-				continue;
-			}
-			if (best == null || candidate.getY() < best.getY()) {
-				best = candidate;
+			Component message = candidate.getMessage();
+			if (message != null && message.getContents() instanceof TranslatableContents tc && translationKey.equals(tc.getKey())) {
+				return candidate;
 			}
 		}
-		return best;
+		return null;
 	}
 }

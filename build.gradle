@@ -86,13 +86,18 @@ processResources {
 	def minecraftDep = project.minecraftDep
 	def javaVersion = project.javaVersion
 	def forgeVersionRange = project.forgeVersionRange
+	def resourcePackFormat = project.resourcePackFormat
 	inputs.property 'version', version
 	inputs.property 'minecraftDep', minecraftDep
 	inputs.property 'javaVersion', javaVersion
 	inputs.property 'forgeVersionRange', forgeVersionRange
+	inputs.property 'resourcePackFormat', resourcePackFormat
 
 	filesMatching('META-INF/mods.toml') {
 		expand 'version': version, 'minecraftDep': minecraftDep, 'javaVersion': javaVersion, 'forgeVersionRange': forgeVersionRange
+	}
+	filesMatching('pack.mcmeta') {
+		expand 'resourcePackFormat': resourcePackFormat
 	}
 }
 
