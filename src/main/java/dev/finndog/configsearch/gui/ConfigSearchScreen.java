@@ -14,7 +14,7 @@ import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//? if >= 26.2 {
+//? if >= 26.1.2 {
 /*import net.minecraft.client.gui.GuiGraphicsExtractor;
 *///?} else {
 import net.minecraft.client.gui.GuiGraphics;
@@ -68,7 +68,7 @@ public final class ConfigSearchScreen extends Screen {
 	}
 	*///?}
 
-	//? if >= 26.2 {
+	//? if >= 26.1.2 {
 	/*@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
 		super.extractRenderState(graphics, mouseX, mouseY, delta);
@@ -251,7 +251,7 @@ public final class ConfigSearchScreen extends Screen {
 			return this.option.optionName();
 		}
 
-		//? if >= 26.2 {
+		//? if >= 26.1.2 {
 		/*@Override
 		public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovered, float delta) {
 			graphics.text(ConfigSearchScreen.this.font, this.option.optionName(), this.getContentX() + 2, this.getContentY() + 1, WHITE);

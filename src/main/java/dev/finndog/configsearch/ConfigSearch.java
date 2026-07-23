@@ -53,7 +53,7 @@ public final class ConfigSearch {
 
 		Component tooltip = Component.translatable("configsearch.button.tooltip");
 		SpriteIconButton button = SpriteIconButton.builder(tooltip,
-				b -> Minecraft.getInstance().setScreen(new ConfigSearchScreen(screen)), true)
+				b -> Minecraft.getInstance()/*? if >= 26.2 {*//*.gui*//*?}*/.setScreen(new ConfigSearchScreen(screen)), true)
 			.size(BUTTON_SIZE, BUTTON_SIZE)
 			.sprite(/*? if >= 1.21.11 {*//*Identifier*//*?} else {*/ResourceLocation/*?}*/.fromNamespaceAndPath(MOD_ID, "search"), 16, 16)
 			.build();

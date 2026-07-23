@@ -27,9 +27,11 @@ public final class BuiltinExtractors {
 		if (loader.isLoaded("midnightlib")) {
 			extractors.add(new MidnightLibExtractor());
 		}
+		//? if < 26.2 {
 		if (loader.isLoaded("configured")) {
 			extractors.add(new ConfiguredExtractor());
 		}
+		//?}
 		return List.copyOf(extractors);
 	}
 }
