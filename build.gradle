@@ -29,8 +29,15 @@ repositories {
 	mavenCentral()
 }
 
+def useOfficialRuntime = !stonecutter.current.version.startsWith('1.20')
+
 minecraft {
 	mappings channel: 'official', version: stonecutter.current.version
+
+	if (useOfficialRuntime) {
+		reobf = false
+		copyIdeResources = true
+	}
 
 	runs {
 		client {
@@ -43,6 +50,14 @@ minecraft {
 				}
 			}
 		}
+	}
+}
+
+if (useOfficialRuntime) {
+	sourceSets.each {
+		def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+		it.output.resourcesDir = dir
+		it.java.destinationDirectory = dir
 	}
 }
 
@@ -99,12 +114,14 @@ jar {
 	}
 }
 
-reobf {
-	jar {}
-}
+if (!useOfficialRuntime) {
+	reobf {
+		jar {}
+	}
 
-tasks.named('jar').configure {
-	finalizedBy tasks.named('reobfJar')
+	tasks.named('jar').configure {
+		finalizedBy tasks.named('reobfJar')
+	}
 }
 
 publishing {
