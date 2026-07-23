@@ -1,13 +1,14 @@
 plugins {
 	id 'net.fabricmc.fabric-loom-remap' version "${loomVersion}"
+	id 'me.modmuss50.mod-publish-plugin' version '0.8.4'
 	id 'maven-publish'
 }
 
-version = "${project.modVersion}+${stonecutter.current.version}"
+version = project.modVersion
 group = project.mavenGroup
 
 base {
-	archivesName = project.modId
+	archivesName = "${project.modId}-${project.branchName}-${stonecutter.current.version}"
 }
 
 repositories {
@@ -115,4 +116,61 @@ publishing {
 
 	repositories {
 	}
+}
+
+import me.modmuss50.mpp.ReleaseType
+
+def changelogFile = rootProject.file('CHANGELOG.md')
+def changelogText = ''
+if (changelogFile.exists()) {
+	def fullText = changelogFile.getText('UTF-8')
+	def quoted = java.util.regex.Pattern.quote(project.modVersion.toString())
+	def pattern = java.util.regex.Pattern.compile(
+		'## \\[' + quoted + '\\] - \\d{4}-\\d{2}-\\d{2}\\r?\\n(.*?)(?=\\r?\\n---|\\r?\\n## \\[|\\z)',
+		java.util.regex.Pattern.DOTALL
+	)
+	def matcher = pattern.matcher(fullText)
+	if (matcher.find()) {
+		changelogText = matcher.group(1).trim()
+	} else {
+		changelogText = fullText
+	}
+}
+
+def releaseChannel = (project.findProperty('releaseType') ?: 'minor').toString() == 'alpha'
+	? ReleaseType.ALPHA
+	: ReleaseType.STABLE
+
+publishMods {
+	file = tasks.named('remapJar').flatMap { it.archiveFile }
+	changelog = changelogText
+	version = "${project.modVersion}-${project.branchName}-${stonecutter.current.version}"
+	type = releaseChannel
+	displayName = "Config Search ${project.modVersion}-${project.branchName}-${stonecutter.current.version}"
+	modLoaders.add(project.branchName.toString())
+	maxRetries = 3
+	dryRun = (project.findProperty('publishDryRun') ?: 'false').toString().toBoolean()
+
+	modrinth {
+		accessToken = providers.environmentVariable('MODRINTH_API_KEY')
+		projectId = (project.findProperty('modrinthProjectId') ?: '').toString()
+		minecraftVersionRange {
+			start = project.findProperty('publishMcStart')
+			end = project.findProperty('publishMcEnd')
+		}
+	}
+
+	curseforge {
+		accessToken = providers.environmentVariable('CURSEFORGE_API_KEY')
+		projectId = (project.findProperty('curseforgeProjectId') ?: '').toString()
+		projectSlug = (project.findProperty('curseforgeProjectSlug') ?: '').toString()
+		minecraftVersionRange {
+			start = project.findProperty('publishMcStart')
+			end = project.findProperty('publishMcEnd')
+		}
+	}
+}
+
+tasks.named('publishMods').configure {
+	dependsOn tasks.named('remapJar')
 }
