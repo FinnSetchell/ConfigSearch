@@ -43,9 +43,11 @@ repositories {
 neoForge {
 	version = project.neoForgeVersion
 
-	parchment {
-		mappingsVersion = '2024.11.17'
-		minecraftVersion = '1.21.1'
+	if (project.hasProperty('parchmentMappingsVersion')) {
+		parchment {
+			mappingsVersion = project.parchmentMappingsVersion
+			minecraftVersion = project.parchmentMinecraftVersion
+		}
 	}
 
 	runs {
@@ -62,21 +64,29 @@ neoForge {
 }
 
 dependencies {
-	compileOnly "dev.isxander:yet-another-config-lib:${project.yaclVersion}"
-	runtimeOnly "dev.isxander:yet-another-config-lib:${project.yaclVersion}"
+	if (project.hasProperty('yaclVersion') && project.yaclVersion) {
+		compileOnly "dev.isxander:yet-another-config-lib:${project.yaclVersion}"
+		runtimeOnly "dev.isxander:yet-another-config-lib:${project.yaclVersion}"
+	}
 
-	compileOnly "me.shedaniel.cloth:cloth-config-neoforge:${project.clothConfigVersion}"
-	runtimeOnly "me.shedaniel.cloth:cloth-config-neoforge:${project.clothConfigVersion}"
+	if (project.hasProperty('clothConfigVersion') && project.clothConfigVersion) {
+		compileOnly "me.shedaniel.cloth:cloth-config-neoforge:${project.clothConfigVersion}"
+		runtimeOnly "me.shedaniel.cloth:cloth-config-neoforge:${project.clothConfigVersion}"
+	}
 
-	compileOnly "maven.modrinth:midnightlib:${project.midnightlibVersion}"
-	runtimeOnly "maven.modrinth:midnightlib:${project.midnightlibVersion}"
+	if (project.hasProperty('midnightlibVersion') && project.midnightlibVersion) {
+		compileOnly "maven.modrinth:midnightlib:${project.midnightlibVersion}"
+		runtimeOnly "maven.modrinth:midnightlib:${project.midnightlibVersion}"
+	}
 
-	if (project.configuredFileId) {
+	if (project.hasProperty('configuredFileId') && project.configuredFileId) {
 		compileOnly "curse.maven:configured-457570:${project.configuredFileId}"
 		runtimeOnly "curse.maven:configured-457570:${project.configuredFileId}"
 	}
 
-	compileOnly "com.electronwill.night-config:core:${project.nightConfigVersion}"
+	if (project.hasProperty('nightConfigVersion') && project.nightConfigVersion) {
+		compileOnly "com.electronwill.night-config:core:${project.nightConfigVersion}"
+	}
 }
 
 processResources {
@@ -87,8 +97,11 @@ processResources {
 	inputs.property 'minecraftDep', minecraftDep
 	inputs.property 'javaVersion', javaVersion
 
+	def neoForgeVersionRange = project.neoForgeVersionRange
+	inputs.property 'neoForgeVersionRange', neoForgeVersionRange
+
 	filesMatching('META-INF/neoforge.mods.toml') {
-		expand 'version': version, 'minecraftDep': minecraftDep, 'javaVersion': javaVersion
+		expand 'version': version, 'minecraftDep': minecraftDep, 'javaVersion': javaVersion, 'neoForgeVersionRange': neoForgeVersionRange
 	}
 }
 

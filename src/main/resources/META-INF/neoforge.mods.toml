@@ -17,7 +17,7 @@ Search every mod's config options from one search bar.
 [[dependencies.configsearch]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.1,)"
+versionRange = "${neoForgeVersionRange}"
 ordering = "NONE"
 side = "CLIENT"
 

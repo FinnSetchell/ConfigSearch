@@ -10,7 +10,11 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+//? if >= 1.21.11 {
+/*import net.minecraft.resources.Identifier;
+*///?} else {
 import net.minecraft.resources.ResourceLocation;
+//?}
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -51,7 +55,7 @@ public final class ConfigSearch {
 		SpriteIconButton button = SpriteIconButton.builder(tooltip,
 				b -> Minecraft.getInstance().setScreen(new ConfigSearchScreen(screen)), true)
 			.size(BUTTON_SIZE, BUTTON_SIZE)
-			.sprite(ResourceLocation.fromNamespaceAndPath(MOD_ID, "search"), 16, 16)
+			.sprite(/*? if >= 1.21.11 {*//*Identifier*//*?} else {*/ResourceLocation/*?}*/.fromNamespaceAndPath(MOD_ID, "search"), 16, 16)
 			.build();
 		button.setPosition(configButton.getX() + shrunk + GAP, configButton.getY());
 		button.setTooltip(Tooltip.create(tooltip));
