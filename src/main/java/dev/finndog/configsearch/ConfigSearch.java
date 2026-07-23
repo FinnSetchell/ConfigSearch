@@ -1,11 +1,16 @@
 package dev.finndog.configsearch;
 
 import dev.finndog.configsearch.gui.ConfigSearchScreen;
+//? if < 1.21.1 {
+/*import dev.finndog.configsearch.gui.IconButton;
+*///?}
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+//? if >= 1.21.1 {
 import net.minecraft.client.gui.components.SpriteIconButton;
+//?}
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -50,12 +55,20 @@ public final class ConfigSearch {
 		configButton.setWidth(shrunk);
 
 		Component tooltip = Component.translatable("configsearch.button.tooltip");
+		int buttonX = configButton.getX() + shrunk + GAP;
+		int buttonY = configButton.getY();
+		//? if >= 1.21.1 {
 		SpriteIconButton button = SpriteIconButton.builder(tooltip,
 				b -> Minecraft.getInstance().setScreen(new ConfigSearchScreen(screen)), true)
 			.size(BUTTON_SIZE, BUTTON_SIZE)
 			.sprite(ResourceLocation.fromNamespaceAndPath(MOD_ID, "search"), 16, 16)
 			.build();
-		button.setPosition(configButton.getX() + shrunk + GAP, configButton.getY());
+		button.setPosition(buttonX, buttonY);
+		//?} else {
+		/*IconButton button = new IconButton(buttonX, buttonY, BUTTON_SIZE, BUTTON_SIZE, tooltip,
+			new ResourceLocation(MOD_ID, "textures/gui/sprites/search.png"),
+			b -> Minecraft.getInstance().setScreen(new ConfigSearchScreen(screen)));
+		*///?}
 		button.setTooltip(Tooltip.create(tooltip));
 		event.addListener(button);
 	}
