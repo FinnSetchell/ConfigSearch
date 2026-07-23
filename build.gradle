@@ -71,7 +71,9 @@ dependencies {
 
 	if (project.hasProperty('configuredFileId') && project.configuredFileId) {
 		compileOnly "curse.maven:configured-457570:${project.configuredFileId}"
-		runtimeOnly "curse.maven:configured-457570:${project.configuredFileId}"
+		if (useOfficialRuntime) {
+			runtimeOnly "curse.maven:configured-457570:${project.configuredFileId}"
+		}
 	}
 
 	if (project.hasProperty('nightConfigVersion') && project.nightConfigVersion) {
