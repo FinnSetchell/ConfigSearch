@@ -2,3 +2,22 @@ plugins {
 	id 'dev.kikugie.stonecutter'
 }
 stonecutter.active '1.21.1' /* [SC] DO NOT EDIT */
+
+tasks.register('publishMods') {
+	def mc = project.findProperty('minecraftVersion')
+	if (mc) {
+		dependsOn ":${mc}:publishMods"
+		doLast {
+			def srcDir = file("versions/${mc}/build/libs")
+			def dstDir = file("build/libs")
+			dstDir.mkdirs()
+			srcDir.listFiles()?.each { src ->
+				new File(dstDir, src.name).bytes = src.bytes
+			}
+		}
+	} else {
+		doFirst {
+			throw new GradleException("minecraftVersion not set in root gradle.properties; use tools/release.sh to tag.")
+		}
+	}
+}
