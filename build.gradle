@@ -1,9 +1,9 @@
 plugins {
-	id 'net.neoforged.moddev' version "${moddevVersion}"
+	id 'net.minecraftforge.gradle' version "${forgeGradleVersion}"
 	id 'maven-publish'
 }
 
-version = "${project.modVersion}+${stonecutter.current.version}-neoforge"
+version = "${project.modVersion}+${stonecutter.current.version}-forge"
 group = project.mavenGroup
 
 base {
@@ -12,23 +12,12 @@ base {
 
 repositories {
 	maven {
-		name = 'NeoForged'
-		url = 'https://maven.neoforged.net/releases'
-	}
-	maven {
-		name = 'isXander'
-		url = 'https://maven.isxander.dev/releases/'
+		name = 'MinecraftForge'
+		url = 'https://maven.minecraftforge.net/'
 	}
 	maven {
 		name = 'shedaniel'
 		url = 'https://maven.shedaniel.me/'
-	}
-	maven {
-		name = 'Modrinth'
-		url = 'https://api.modrinth.com/maven'
-		content {
-			includeGroup 'maven.modrinth'
-		}
 	}
 	maven {
 		name = 'CurseMaven'
@@ -40,43 +29,29 @@ repositories {
 	mavenCentral()
 }
 
-neoForge {
-	version = project.neoForgeVersion
-
-	if (project.hasProperty('parchmentMappingsVersion')) {
-		parchment {
-			mappingsVersion = project.parchmentMappingsVersion
-			minecraftVersion = project.parchmentMinecraftVersion
-		}
-	}
+minecraft {
+	mappings channel: 'official', version: stonecutter.current.version
 
 	runs {
 		client {
-			client()
-		}
-	}
-
-	mods {
-		configsearch {
-			sourceSet sourceSets.main
+			workingDirectory project.file('run')
+			property 'forge.logging.markers', 'REGISTRIES'
+			property 'forge.logging.console.level', 'debug'
+			mods {
+				configsearch {
+					source sourceSets.main
+				}
+			}
 		}
 	}
 }
 
 dependencies {
-	if (project.hasProperty('yaclVersion') && project.yaclVersion) {
-		compileOnly "dev.isxander:yet-another-config-lib:${project.yaclVersion}"
-		runtimeOnly "dev.isxander:yet-another-config-lib:${project.yaclVersion}"
-	}
+	minecraft "net.minecraftforge:forge:${stonecutter.current.version}-${project.forgeVersion}"
 
 	if (project.hasProperty('clothConfigVersion') && project.clothConfigVersion) {
-		compileOnly "me.shedaniel.cloth:cloth-config-neoforge:${project.clothConfigVersion}"
-		runtimeOnly "me.shedaniel.cloth:cloth-config-neoforge:${project.clothConfigVersion}"
-	}
-
-	if (project.hasProperty('midnightlibVersion') && project.midnightlibVersion) {
-		compileOnly "maven.modrinth:midnightlib:${project.midnightlibVersion}"
-		runtimeOnly "maven.modrinth:midnightlib:${project.midnightlibVersion}"
+		compileOnly "me.shedaniel.cloth:cloth-config-forge:${project.clothConfigVersion}"
+		runtimeOnly "me.shedaniel.cloth:cloth-config-forge:${project.clothConfigVersion}"
 	}
 
 	if (project.hasProperty('configuredFileId') && project.configuredFileId) {
@@ -93,15 +68,14 @@ processResources {
 	def version = project.version
 	def minecraftDep = project.minecraftDep
 	def javaVersion = project.javaVersion
+	def forgeVersionRange = project.forgeVersionRange
 	inputs.property 'version', version
 	inputs.property 'minecraftDep', minecraftDep
 	inputs.property 'javaVersion', javaVersion
+	inputs.property 'forgeVersionRange', forgeVersionRange
 
-	def neoForgeVersionRange = project.neoForgeVersionRange
-	inputs.property 'neoForgeVersionRange', neoForgeVersionRange
-
-	filesMatching('META-INF/neoforge.mods.toml') {
-		expand 'version': version, 'minecraftDep': minecraftDep, 'javaVersion': javaVersion, 'neoForgeVersionRange': neoForgeVersionRange
+	filesMatching('META-INF/mods.toml') {
+		expand 'version': version, 'minecraftDep': minecraftDep, 'javaVersion': javaVersion, 'forgeVersionRange': forgeVersionRange
 	}
 }
 
@@ -125,10 +99,18 @@ jar {
 	}
 }
 
+reobf {
+	jar {}
+}
+
+tasks.named('jar').configure {
+	finalizedBy tasks.named('reobfJar')
+}
+
 publishing {
 	publications {
 		create('mavenJava', MavenPublication) {
-			from components.java
+			artifact jar
 		}
 	}
 

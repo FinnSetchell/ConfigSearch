@@ -10,26 +10,24 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-//? if >= 1.21.11 {
-/*import net.minecraft.resources.Identifier;
-*///?} else {
 import net.minecraft.resources.ResourceLocation;
-//?}
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.client.event.ScreenEvent;
-import net.neoforged.neoforge.client.gui.ModListScreen;
-import net.neoforged.neoforge.common.NeoForge;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.client.gui.ModListScreen;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
-@Mod(value = ConfigSearch.MOD_ID, dist = Dist.CLIENT)
+@Mod(ConfigSearch.MOD_ID)
 public final class ConfigSearch {
 	public static final String MOD_ID = "configsearch";
 	private static final int BUTTON_SIZE = 20;
 	private static final int GAP = 2;
 
-	public ConfigSearch(IEventBus modBus) {
-		NeoForge.EVENT_BUS.addListener(ConfigSearch::onScreenInit);
+	public ConfigSearch() {
+		if (FMLEnvironment.dist == Dist.CLIENT) {
+			MinecraftForge.EVENT_BUS.addListener(ConfigSearch::onScreenInit);
+		}
 	}
 
 	private static void onScreenInit(ScreenEvent.Init.Post event) {
@@ -53,9 +51,9 @@ public final class ConfigSearch {
 
 		Component tooltip = Component.translatable("configsearch.button.tooltip");
 		SpriteIconButton button = SpriteIconButton.builder(tooltip,
-				b -> Minecraft.getInstance()/*? if >= 26.2 {*//*.gui*//*?}*/.setScreen(new ConfigSearchScreen(screen)), true)
+				b -> Minecraft.getInstance().setScreen(new ConfigSearchScreen(screen)), true)
 			.size(BUTTON_SIZE, BUTTON_SIZE)
-			.sprite(/*? if >= 1.21.11 {*//*Identifier*//*?} else {*/ResourceLocation/*?}*/.fromNamespaceAndPath(MOD_ID, "search"), 16, 16)
+			.sprite(ResourceLocation.fromNamespaceAndPath(MOD_ID, "search"), 16, 16)
 			.build();
 		button.setPosition(configButton.getX() + shrunk + GAP, configButton.getY());
 		button.setTooltip(Tooltip.create(tooltip));

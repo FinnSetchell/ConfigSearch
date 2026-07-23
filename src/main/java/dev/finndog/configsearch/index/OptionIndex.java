@@ -17,9 +17,10 @@ import java.util.ServiceLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.ModList;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.minecraftforge.client.ConfigScreenHandler;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.forgespi.language.IModInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,15 +121,20 @@ public final class OptionIndex {
 		return new Registration(extractors, entriesByMod);
 	}
 
-	private Map<String, IConfigScreenFactory> collectFactories() {
-		Map<String, IConfigScreenFactory> factories = new LinkedHashMap<>();
-		for (ModContainer container : ModList.get().getSortedMods()) {
-			String modId = container.getModId();
+	private Map<String, ConfigScreenHandler.ConfigScreenFactory> collectFactories() {
+		Map<String, ConfigScreenHandler.ConfigScreenFactory> factories = new LinkedHashMap<>();
+		for (IModInfo info : ModList.get().getMods()) {
+			String modId = info.getModId();
 			if (modId.equals("configsearch")) {
 				continue;
 			}
+			ModContainer container = ModList.get().getModContainerById(modId).orElse(null);
+			if (container == null) {
+				continue;
+			}
 			try {
-				Optional<IConfigScreenFactory> factory = container.getCustomExtension(IConfigScreenFactory.class);
+				Optional<ConfigScreenHandler.ConfigScreenFactory> factory =
+					container.getCustomExtension(ConfigScreenHandler.ConfigScreenFactory.class);
 				factory.ifPresent(f -> factories.put(modId, f));
 			} catch (Throwable t) {
 				LOGGER.warn("Failed to read config screen factory for mod {}", modId, t);
@@ -137,13 +143,13 @@ public final class OptionIndex {
 		return factories;
 	}
 
-	private List<ConfigOptionEntry> extractFromScreen(String modId, IConfigScreenFactory factory, List<ScreenOptionExtractor> extractors) {
+	private List<ConfigOptionEntry> extractFromScreen(String modId, ConfigScreenHandler.ConfigScreenFactory factory, List<ScreenOptionExtractor> extractors) {
 		ModContainer modContainer = ModList.get().getModContainerById(modId).orElse(null);
 		if (modContainer == null) {
 			return List.of();
 		}
 		ModInfo info = new ModInfo(modContainer.getModId(), modContainer.getModInfo().getDisplayName());
-		ScreenOpener opener = parent -> factory.createScreen(modContainer, parent);
+		ScreenOpener opener = parent -> factory.screenFunction().apply(Minecraft.getInstance(), parent);
 		try {
 			Screen screen = opener.open(throwawayParent());
 			if (screen == null) {

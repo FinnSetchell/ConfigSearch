@@ -1,8 +1,8 @@
 pluginManagement {
 	repositories {
 		maven {
-			name = 'NeoForged'
-			url = 'https://maven.neoforged.net/releases'
+			name = 'MinecraftForge'
+			url = 'https://maven.minecraftforge.net/'
 		}
 		maven {
 			name = 'KikuGie'
@@ -14,16 +14,13 @@ pluginManagement {
 }
 
 plugins {
-	id 'dev.kikugie.stonecutter' version '0.9.6'
+	id 'dev.kikugie.stonecutter' version '0.7.11'
 }
 
 stonecutter {
 	shared {
 		vcsVersion = '1.21.1'
 		version('1.21.1', '1.21.1').buildscript('build.gradle')
-		version('1.21.11', '1.21.11').buildscript('build.gradle')
-		version('26.1.2', '26.1.2').buildscript('build.gradle')
-		version('26.2', '26.2').buildscript('build.gradle')
 	}
 	create rootProject
 }
