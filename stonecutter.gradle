@@ -3,18 +3,32 @@ plugins {
 }
 stonecutter.active '1.21.1' /* [SC] DO NOT EDIT */
 
+def copySubprojectJars(String mc) {
+	def srcDir = file("versions/${mc}/build/libs")
+	def dstDir = file("build/libs")
+	dstDir.mkdirs()
+	srcDir.listFiles()?.each { src ->
+		new File(dstDir, src.name).bytes = src.bytes
+	}
+}
+
+tasks.register('build') {
+	def mc = project.findProperty('minecraftVersion')
+	if (mc) {
+		dependsOn ":${mc}:build"
+		doLast { copySubprojectJars(mc) }
+	} else {
+		doFirst {
+			throw new GradleException("minecraftVersion not set in root gradle.properties; use tools/release.sh to tag.")
+		}
+	}
+}
+
 tasks.register('publishMods') {
 	def mc = project.findProperty('minecraftVersion')
 	if (mc) {
 		dependsOn ":${mc}:publishMods"
-		doLast {
-			def srcDir = file("versions/${mc}/build/libs")
-			def dstDir = file("build/libs")
-			dstDir.mkdirs()
-			srcDir.listFiles()?.each { src ->
-				new File(dstDir, src.name).bytes = src.bytes
-			}
-		}
+		doLast { copySubprojectJars(mc) }
 	} else {
 		doFirst {
 			throw new GradleException("minecraftVersion not set in root gradle.properties; use tools/release.sh to tag.")
