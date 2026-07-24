@@ -26,6 +26,7 @@ jobs:
       tag:         ${{ inputs.tag }}
       releaseType: ${{ inputs.releaseType }}
       releaseId:   ${{ inputs.releaseId }}
+      javaVersion: '25'
     secrets:
       MODRINTH_API_KEY:   ${{ secrets.MODRINTH_API_KEY }}
       CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}

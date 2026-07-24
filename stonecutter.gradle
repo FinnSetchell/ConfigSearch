@@ -12,11 +12,28 @@ def copySubprojectJars(String mc) {
 	}
 }
 
+// In CI, only run tasks on the tagged MC subproject. The release-actions
+// workflow runs 'gradlew build' and 'gradlew publishMods' with no project
+// qualifier, and Gradle's name-matching fans those out to every
+// subproject. That both compiles subprojects the tag doesn't care about
+// (breaking on version-mismatched javac/toolchains) and, at publish
+// time, uploads every jar for every tag (Modrinth/CurseForge then reject
+// the second tag with "version already exists").
+def targetMc = project.findProperty('minecraftVersion')
+if (System.getenv('CI') && targetMc) {
+	gradle.taskGraph.whenReady { graph ->
+		graph.allTasks.each { t ->
+			if (t.project != rootProject && t.project.name != targetMc) {
+				t.enabled = false
+			}
+		}
+	}
+}
+
 tasks.register('build') {
-	def mc = project.findProperty('minecraftVersion')
-	if (mc) {
-		dependsOn ":${mc}:build"
-		doLast { copySubprojectJars(mc) }
+	if (targetMc) {
+		dependsOn ":${targetMc}:build"
+		doLast { copySubprojectJars(targetMc) }
 	} else {
 		doFirst {
 			throw new GradleException("minecraftVersion not set in root gradle.properties; use tools/release.sh to tag.")
@@ -25,10 +42,9 @@ tasks.register('build') {
 }
 
 tasks.register('publishMods') {
-	def mc = project.findProperty('minecraftVersion')
-	if (mc) {
-		dependsOn ":${mc}:publishMods"
-		doLast { copySubprojectJars(mc) }
+	if (targetMc) {
+		dependsOn ":${targetMc}:publishMods"
+		doLast { copySubprojectJars(targetMc) }
 	} else {
 		doFirst {
 			throw new GradleException("minecraftVersion not set in root gradle.properties; use tools/release.sh to tag.")
