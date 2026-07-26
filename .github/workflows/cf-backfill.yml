@@ -30,9 +30,9 @@ on:
         type: string
         required: true
       mode:
-        description: 'report (read-only) or upload'
+        description: 'report (read-only), diagnose (read-only catalog dump) or upload'
         type: choice
-        options: [report, upload]
+        options: [report, diagnose, upload]
         default: report
       confirm:
         description: 'Type UPLOAD-BACKFILL to arm mode=upload'
