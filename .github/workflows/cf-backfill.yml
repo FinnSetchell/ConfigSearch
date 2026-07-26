@@ -1,0 +1,58 @@
+# Thin caller for the reusable CurseForge backfill.
+#
+# Manual only, and for one job: mirroring jars that are already published on
+# Modrinth onto CurseForge, where a half-finished legacy publish left gaps.
+# It re-uploads the EXACT bytes Modrinth serves (sha1-verified) and never
+# builds anything.
+#
+# Default mode is 'report', which performs no writes at all — run that first,
+# read the plan in the job summary, then re-run with mode=upload and
+# confirm=UPLOAD-BACKFILL if the plan looks right. A file already visible on
+# the CurseForge listing is skipped, so re-running is safe.
+
+name: CurseForge backfill
+
+on:
+  workflow_dispatch:
+    inputs:
+      projectId:
+        description: 'CurseForge project id (Config Search = 1603654)'
+        type: string
+        required: true
+        default: '1603654'
+      modrinthProject:
+        description: 'Modrinth project id or slug (Config Search = wsGFU1GE)'
+        type: string
+        required: true
+        default: 'wsGFU1GE'
+      items:
+        description: 'JSON array of {"modrinthVersionId","expectedFileName"}'
+        type: string
+        required: true
+      mode:
+        description: 'report (read-only) or upload'
+        type: choice
+        options: [report, upload]
+        default: report
+      confirm:
+        description: 'Type UPLOAD-BACKFILL to arm mode=upload'
+        type: string
+        required: false
+        default: ''
+      changelogVersion:
+        description: 'CHANGELOG.md heading to reuse for the uploads (e.g. 1.0.0)'
+        type: string
+        required: false
+        default: '1.0.0'
+
+jobs:
+  backfill:
+    uses: FinnSetchell/release-actions/.github/workflows/cf-backfill.yml@main
+    with:
+      projectId: ${{ inputs.projectId }}
+      modrinthProject: ${{ inputs.modrinthProject }}
+      items: ${{ inputs.items }}
+      mode: ${{ inputs.mode }}
+      confirm: ${{ inputs.confirm }}
+      changelogVersion: ${{ inputs.changelogVersion }}
+    secrets: inherit
