@@ -3,51 +3,16 @@ plugins {
 }
 stonecutter.active '1.21.1' /* [SC] DO NOT EDIT */
 
-def copySubprojectJars(String mc) {
-	def srcDir = file("versions/${mc}/build/libs")
-	def dstDir = file("build/libs")
-	dstDir.mkdirs()
-	srcDir.listFiles()?.each { src ->
-		new File(dstDir, src.name).bytes = src.bytes
-	}
-}
-
-// In CI, only run tasks on the tagged MC subproject. The release-actions
-// workflow runs 'gradlew build' and 'gradlew publishMods' with no project
-// qualifier, and Gradle's name-matching fans those out to every
-// subproject. That both compiles subprojects the tag doesn't care about
-// (breaking on version-mismatched javac/toolchains) and, at publish
-// time, uploads every jar for every tag (Modrinth/CurseForge then reject
-// the second tag with "version already exists").
-def targetMc = project.findProperty('minecraftVersion')
-if (System.getenv('CI') && targetMc) {
-	gradle.taskGraph.whenReady { graph ->
-		graph.allTasks.each { t ->
-			if (t.project != rootProject && t.project.name != targetMc) {
-				t.enabled = false
-			}
-		}
-	}
-}
-
-tasks.register('build') {
-	if (targetMc) {
-		dependsOn ":${targetMc}:build"
-		doLast { copySubprojectJars(targetMc) }
-	} else {
-		doFirst {
-			throw new GradleException("minecraftVersion not set in root gradle.properties; use tools/release.sh to tag.")
-		}
-	}
-}
-
-tasks.register('publishMods') {
-	if (targetMc) {
-		dependsOn ":${targetMc}:publishMods"
-		doLast { copySubprojectJars(targetMc) }
-	} else {
-		doFirst {
-			throw new GradleException("minecraftVersion not set in root gradle.properties; use tools/release.sh to tag.")
-		}
-	}
-}
+// No root 'build' / 'publishMods' tasks and no CI task-disabling guard.
+//
+// Both existed only for release-actions v1, which ran 'gradlew build' and
+// 'gradlew publishMods' UNQUALIFIED: Gradle's name matching fanned those out
+// to every Stonecutter subproject, compiling versions the tag did not care
+// about and - at publish time - uploading every jar for every tag. The guard
+// disabled tasks outside the -PminecraftVersion subproject to contain that.
+//
+// v2 never issues an unqualified task. A per-MC-version target declares
+// buildCommand ':{mc}:build' in .github/moogs-publish.yml, so v2/build.py runs
+// one qualified invocation per MC version on that version's own JDK, and
+// publishing is not Gradle's job at all (reconcile uploads natively). Both
+// mechanisms are therefore removed together rather than left half-live.

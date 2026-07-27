@@ -1,0 +1,84 @@
+# v2 publish manifest — FinnSetchell/ConfigSearch
+#
+# Lives ONLY on the default branch (`master`); every workflow fetches it from
+# there regardless of which branch a tag sits on.
+#
+# ConfigSearch is a STONECUTTER repo: one branch per LOADER, each branch
+# building several MC versions from one source tree. So every target declares
+# `builds` (per-MC-version) rather than an `mc` window, and the tag's trailing
+# half is the target's WORD label, not an MC number — the three branches all
+# build 1.21.1, so no MC number could say which branch a tag means.
+#
+#   1.0.4-fabric    -> master   (4 builds)
+#   1.0.4-forge     -> forge    (2 builds)
+#   1.0.4-neoforge  -> neoforge (4 builds)
+schema: 1
+mod:
+  id: configsearch
+  displayName: "Config Search"
+  # Live-verified 2026-07-27 against https://www.curseforge.com/api/v1/mods/1603654/files
+  # — all 10 published files carry the 'Client' tag and none carries 'Server'.
+  # ConfigSearch is a client-side UI mod, unlike the rest of the fleet.
+  environments: [Client]
+  name: ConfigSearch
+platforms:
+  # Live-verified 2026-07-27 (CF public files endpoint; Modrinth /v2/project).
+  curseforge: { projectId: 1603654, slug: config-search }
+  modrinth:   { projectId: wsGFU1GE, slug: config-search }
+discord:
+  # From the retired discord* keys in each branch's gradle.properties.
+  # discordBannerUrl was empty on all three branches, so no bannerUrl here.
+  embedColor: "#57f287"
+  avatarUrl: "https://media.forgecdn.net/avatars/thumbnails/1909/867/256/256/639191948711121606.png"
+  thumbnailUrl: "https://media.forgecdn.net/avatars/thumbnails/1909/867/256/256/639191948711121606.png"
+  pingDefault: true
+artifacts:
+  - type: mod-jar
+targets:
+  # `builds[].java` is the JDK that RUNS Gradle for that build, which is not the
+  # same number as `javaVersion` in versions/<mc>/gradle.properties: that one is
+  # the bytecode TARGET (`options.release` / source+targetCompatibility) and is
+  # honoured whatever JVM Gradle runs on. They match everywhere except
+  # master/1.20.1 - see the note on that build.
+  #
+  # `buildCommand` addresses the Stonecutter subproject DIRECTLY:
+  # the root `build` task (with its -PminecraftVersion property, its
+  # copySubprojectJars step and the CI task-disabling guard) existed only to
+  # make v1's unqualified `gradlew build` safe, and has been removed.
+  - branch: master
+    # The branch is called `master` but the repo has always called the loader
+    # line `fabric` (branchName=fabric / publishBranch=fabric), and `master` is
+    # not a readable tag label.
+    tagLabel: fabric
+    loaders: [fabric]
+    buildCommand: ":{mc}:build"
+    jarDir: "versions/{mc}/build/libs"
+    builds:
+      # 21, NOT the 17 in versions/1.20.1/gradle.properties: this branch is on
+      # Stonecutter 0.9.6, whose settings plugin refuses to resolve on a Java 17
+      # JVM ("Dependency requires at least JVM runtime version 21") - verified by
+      # building it. v1 never hit this because it ran the whole Stonecutter tree
+      # on ONE JVM (the caller's javaVersion: '25'). The jar is unaffected: built
+      # on 21 it still carries class-file major 61 and `"java": ">=17"`, verified
+      # on the produced ConfigSearch-fabric-1.20.1-1.0.0.jar.
+      # (The forge branch is on Stonecutter 0.7.11 and does build 1.20.1 on 17.)
+      - { mc: "1.20.1",  java: 21 }
+      - { mc: "1.21.1",  java: 21 }
+      - { mc: "1.21.11", java: 21 }
+      - { mc: "26.2",    java: 25 }
+  - branch: forge
+    loaders: [forge]
+    buildCommand: ":{mc}:build"
+    jarDir: "versions/{mc}/build/libs"
+    builds:
+      - { mc: "1.20.1", java: 17 }
+      - { mc: "1.21.1", java: 21 }
+  - branch: neoforge
+    loaders: [neoforge]
+    buildCommand: ":{mc}:build"
+    jarDir: "versions/{mc}/build/libs"
+    builds:
+      - { mc: "1.21.1",  java: 21 }
+      - { mc: "1.21.11", java: 21 }
+      - { mc: "26.1.2",  java: 25 }
+      - { mc: "26.2",    java: 25 }
