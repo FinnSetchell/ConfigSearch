@@ -1,14 +1,13 @@
 plugins {
-	id 'net.minecraftforge.gradle' version "${forgeGradleVersion}"
-	id 'me.modmuss50.mod-publish-plugin' version '0.8.4'
+	id 'net.minecraftforge.gradle' version "${forge_gradle_version}"
 	id 'maven-publish'
 }
 
-version = project.modVersion
-group = project.mavenGroup
+version = project.mod_version
+group = project.maven_group
 
 base {
-	archivesName = "${project.modId}-${project.branchName}-${stonecutter.current.version}"
+	archivesName = "${project.archives_base_name}-${project.branch_name}-${stonecutter.current.version}"
 }
 
 repositories {
@@ -63,31 +62,31 @@ if (useOfficialRuntime) {
 }
 
 dependencies {
-	minecraft "net.minecraftforge:forge:${stonecutter.current.version}-${project.forgeVersion}"
+	minecraft "net.minecraftforge:forge:${stonecutter.current.version}-${project.forge_version}"
 
-	if (project.hasProperty('clothConfigVersion') && project.clothConfigVersion) {
-		compileOnly "me.shedaniel.cloth:cloth-config-forge:${project.clothConfigVersion}"
-		runtimeOnly "me.shedaniel.cloth:cloth-config-forge:${project.clothConfigVersion}"
+	if (project.hasProperty('cloth_config_version') && project.cloth_config_version) {
+		compileOnly "me.shedaniel.cloth:cloth-config-forge:${project.cloth_config_version}"
+		runtimeOnly "me.shedaniel.cloth:cloth-config-forge:${project.cloth_config_version}"
 	}
 
-	if (project.hasProperty('configuredFileId') && project.configuredFileId) {
-		compileOnly "curse.maven:configured-457570:${project.configuredFileId}"
+	if (project.hasProperty('configured_file_id') && project.configured_file_id) {
+		compileOnly "curse.maven:configured-457570:${project.configured_file_id}"
 		if (useOfficialRuntime) {
-			runtimeOnly "curse.maven:configured-457570:${project.configuredFileId}"
+			runtimeOnly "curse.maven:configured-457570:${project.configured_file_id}"
 		}
 	}
 
-	if (project.hasProperty('nightConfigVersion') && project.nightConfigVersion) {
-		compileOnly "com.electronwill.night-config:core:${project.nightConfigVersion}"
+	if (project.hasProperty('night_config_version') && project.night_config_version) {
+		compileOnly "com.electronwill.night-config:core:${project.night_config_version}"
 	}
 }
 
 processResources {
 	def version = project.version
-	def minecraftDep = project.minecraftDep
-	def javaVersion = project.javaVersion
-	def forgeVersionRange = project.forgeVersionRange
-	def resourcePackFormat = project.resourcePackFormat
+	def minecraftDep = project.minecraft_dep
+	def javaVersion = project.java_version
+	def forgeVersionRange = project.forge_version_range
+	def resourcePackFormat = project.resource_pack_format
 	inputs.property 'version', version
 	inputs.property 'minecraftDep', minecraftDep
 	inputs.property 'javaVersion', javaVersion
@@ -103,14 +102,14 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = Integer.parseInt(project.javaVersion)
+	it.options.release = Integer.parseInt(project.java_version)
 }
 
 java {
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.toVersion(project.javaVersion)
-	targetCompatibility = JavaVersion.toVersion(project.javaVersion)
+	sourceCompatibility = JavaVersion.toVersion(project.java_version)
+	targetCompatibility = JavaVersion.toVersion(project.java_version)
 }
 
 jar {
@@ -141,63 +140,4 @@ publishing {
 
 	repositories {
 	}
-}
-
-import me.modmuss50.mpp.ReleaseType
-
-def changelogFile = rootProject.file('CHANGELOG.md')
-def changelogText = ''
-if (changelogFile.exists()) {
-	def fullText = changelogFile.getText('UTF-8')
-	def quoted = java.util.regex.Pattern.quote(project.modVersion.toString())
-	def pattern = java.util.regex.Pattern.compile(
-		'## \\[' + quoted + '\\] - \\d{4}-\\d{2}-\\d{2}\\r?\\n(.*?)(?=\\r?\\n---|\\r?\\n## \\[|\\z)',
-		java.util.regex.Pattern.DOTALL
-	)
-	def matcher = pattern.matcher(fullText)
-	if (matcher.find()) {
-		changelogText = matcher.group(1).trim()
-	} else {
-		changelogText = fullText
-	}
-}
-
-def releaseChannel = (project.findProperty('releaseType') ?: 'minor').toString() == 'alpha'
-	? ReleaseType.ALPHA
-	: ReleaseType.STABLE
-
-publishMods {
-	file = tasks.named('jar').flatMap { it.archiveFile }
-	changelog = changelogText
-	version = "${project.modVersion}-${project.branchName}-${stonecutter.current.version}"
-	type = releaseChannel
-	displayName = "Config Search ${project.modVersion}-${project.branchName}-${stonecutter.current.version}"
-	modLoaders.add(project.branchName.toString())
-	maxRetries = 3
-	dryRun = (project.findProperty('publishDryRun') ?: 'false').toString().toBoolean()
-
-	modrinth {
-		accessToken = providers.environmentVariable('MODRINTH_API_KEY')
-		projectId = (project.findProperty('modrinthProjectId') ?: '').toString()
-		minecraftVersionRange {
-			start = project.findProperty('publishMcStart')
-			end = project.findProperty('publishMcEnd')
-		}
-	}
-
-	curseforge {
-		accessToken = providers.environmentVariable('CURSEFORGE_API_KEY')
-		projectId = (project.findProperty('curseforgeProjectId') ?: '').toString()
-		projectSlug = (project.findProperty('curseforgeProjectSlug') ?: '').toString()
-		clientRequired = true
-		serverRequired = false
-		minecraftVersionRange {
-			start = project.findProperty('publishMcStart')
-			end = project.findProperty('publishMcEnd')
-		}
-	}
-}
-
-tasks.named('publishMods').configure {
-	dependsOn tasks.named('jar')
 }

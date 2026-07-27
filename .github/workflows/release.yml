@@ -1,16 +1,20 @@
 name: Release
 
+# ONE fleet-standard tag shape: version-first, `<X.Y.Z>-<label>`. ConfigSearch is
+# a per-MC-version (Stonecutter) repo, so the label is the target's WORD label -
+# 1.0.4-fabric / 1.0.4-forge / 1.0.4-neoforge - not an MC number: all three
+# branches build 1.21.1, so no MC number could say which branch a tag means.
+# Both patterns still match `*.*.*-*`.
 on:
   push:
     tags:
-      - '*.*.*-*.*.*'
-      - '*.*.*-*.*'
+      - '*.*.*-*'
+      - '*.*.*-alpha.*-*'
 
 permissions:
   contents: write
 
 jobs:
   release:
-    uses: FinnSetchell/release-actions/.github/workflows/release.yml@v1
-    secrets:
-      WORKER_API_KEY: ${{ secrets.WORKER_API_KEY }}
+    uses: FinnSetchell/release-actions/.github/workflows/release-v2.yml@v2
+    secrets: inherit
