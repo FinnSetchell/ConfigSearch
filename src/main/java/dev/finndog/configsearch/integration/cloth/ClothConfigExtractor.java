@@ -1,5 +1,6 @@
 package dev.finndog.configsearch.integration.cloth;
 
+//? if < 26.1 {
 import dev.finndog.configsearch.api.ConfigOptionEntry;
 import dev.finndog.configsearch.api.ExtractionContext;
 import dev.finndog.configsearch.api.ScreenOpener;
@@ -95,3 +96,9 @@ public final class ClothConfigExtractor implements ScreenOptionExtractor {
 		};
 	}
 }
+//?} else {
+/*public final class ClothConfigExtractor {
+	private ClothConfigExtractor() {
+	}
+}
+*///?}

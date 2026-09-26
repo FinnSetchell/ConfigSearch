@@ -1,6 +1,6 @@
 {
   "pack": {
-    "pack_format": ${resourcePackFormat},
+    ${packFormat},
     "description": "Config Search resources"
   }
 }

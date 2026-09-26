@@ -14,12 +14,21 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
+//? if >= 1.21.11 {
+/*import net.minecraft.resources.Identifier;
+*///?} else {
 import net.minecraft.resources.ResourceLocation;
+//?}
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.gui.ModListScreen;
+//? if < 26.1 {
 import net.minecraftforge.common.MinecraftForge;
+//?}
 import net.minecraftforge.fml.common.Mod;
+//? if >= 26.1 {
+/*import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+*///?}
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
 @Mod(ConfigSearch.MOD_ID)
@@ -28,11 +37,19 @@ public final class ConfigSearch {
 	private static final int BUTTON_SIZE = 20;
 	private static final int GAP = 2;
 
+	//? if >= 26.1 {
+	/*public ConfigSearch(FMLJavaModLoadingContext context) {
+		if (FMLEnvironment.dist == Dist.CLIENT) {
+			ScreenEvent.Init.Post.BUS.addListener(ConfigSearch::onScreenInit);
+		}
+	}
+	*///?} else {
 	public ConfigSearch() {
 		if (FMLEnvironment.dist == Dist.CLIENT) {
 			MinecraftForge.EVENT_BUS.addListener(ConfigSearch::onScreenInit);
 		}
 	}
+	//?}
 
 	private static void onScreenInit(ScreenEvent.Init.Post event) {
 		Screen screen = event.getScreen();
@@ -54,9 +71,13 @@ public final class ConfigSearch {
 		int buttonY = configButton.getY();
 		//? if >= 1.21.1 {
 		SpriteIconButton button = SpriteIconButton.builder(tooltip,
-				b -> Minecraft.getInstance().setScreen(new ConfigSearchScreen(screen)), true)
+				b -> Minecraft.getInstance()/*? if >= 26.2 {*//*.gui*//*?}*/.setScreen(new ConfigSearchScreen(screen)), true)
 			.size(BUTTON_SIZE, BUTTON_SIZE)
+			//? if >= 1.21.11 {
+			/*.sprite(Identifier.fromNamespaceAndPath(MOD_ID, "search"), 16, 16)
+			*///?} else {
 			.sprite(ResourceLocation.fromNamespaceAndPath(MOD_ID, "search"), 16, 16)
+			//?}
 			.build();
 		button.setPosition(buttonX, buttonY);
 		//?} else {

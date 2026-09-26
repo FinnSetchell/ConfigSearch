@@ -123,12 +123,12 @@ public final class OptionIndex {
 
 	private Map<String, ConfigScreenHandler.ConfigScreenFactory> collectFactories() {
 		Map<String, ConfigScreenHandler.ConfigScreenFactory> factories = new LinkedHashMap<>();
-		for (IModInfo info : ModList.get().getMods()) {
+		for (IModInfo info : ModList/*? if < 26.1 {*/.get()/*?}*/.getMods()) {
 			String modId = info.getModId();
 			if (modId.equals("configsearch")) {
 				continue;
 			}
-			ModContainer container = ModList.get().getModContainerById(modId).orElse(null);
+			ModContainer container = ModList/*? if < 26.1 {*/.get()/*?}*/.getModContainerById(modId).orElse(null);
 			if (container == null) {
 				continue;
 			}
@@ -144,7 +144,7 @@ public final class OptionIndex {
 	}
 
 	private List<ConfigOptionEntry> extractFromScreen(String modId, ConfigScreenHandler.ConfigScreenFactory factory, List<ScreenOptionExtractor> extractors) {
-		ModContainer modContainer = ModList.get().getModContainerById(modId).orElse(null);
+		ModContainer modContainer = ModList/*? if < 26.1 {*/.get()/*?}*/.getModContainerById(modId).orElse(null);
 		if (modContainer == null) {
 			return List.of();
 		}
