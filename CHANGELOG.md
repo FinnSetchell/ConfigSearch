@@ -1,22 +1,12 @@
-## [1.0.3] - 2026-07-24
-
-_Pending. Update this header date and replace this line with the actual changes before tagging._
-
----
-
-## [1.0.2] - 2026-07-24
-
-_Pending. Update this header date and replace this line with the actual changes before tagging._
-
----
-
-## [1.0.1] - 2026-07-24
-
-_Pending. Update this header date and replace this line with the actual changes before tagging._
-
----
-
 # Config Search
+
+## [1.1.0] - 2026-09-26
+
+### Added
+- Support for Minecraft 26.3
+
+### Changed
+- On 26.3 the search button now sits next to the mod list's search box
 
 ## [1.0.0] - 2026-07-23
 
