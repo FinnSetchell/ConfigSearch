@@ -24,6 +24,7 @@ stonecutter {
 		version('1.21.1', '1.21.1').buildscript('build-obfuscated.gradle')
 		version('1.21.11', '1.21.11').buildscript('build-obfuscated.gradle')
 		version('26.2', '26.2').buildscript('build-unobfuscated.gradle')
+		version('26.3', '26.3').buildscript('build-unobfuscated.gradle')
 	}
 	create rootProject
 }
