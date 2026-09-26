@@ -24,6 +24,7 @@ stonecutter {
 		version('1.21.11', '1.21.11').buildscript('build.gradle')
 		version('26.1.2', '26.1.2').buildscript('build.gradle')
 		version('26.2', '26.2').buildscript('build.gradle')
+		version('26.3', '26.3').buildscript('build.gradle')
 	}
 	create rootProject
 }

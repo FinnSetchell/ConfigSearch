@@ -19,7 +19,11 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.ScreenEvent;
+//? if >= 26.3 {
+/*import net.neoforged.neoforge.client.gui.modlist.ModListScreen;
+*///?} else {
 import net.neoforged.neoforge.client.gui.ModListScreen;
+//?}
 import net.neoforged.neoforge.common.NeoForge;
 
 @Mod(value = ConfigSearch.MOD_ID, dist = Dist.CLIENT)
@@ -27,9 +31,15 @@ public final class ConfigSearch {
 	public static final String MOD_ID = "configsearch";
 	private static final int BUTTON_SIZE = 20;
 	private static final int GAP = 2;
+	//? if >= 26.3 {
+	/*private static Runnable placeButton;
+	*///?}
 
 	public ConfigSearch(IEventBus modBus) {
 		NeoForge.EVENT_BUS.addListener(ConfigSearch::onScreenInit);
+		//? if >= 26.3 {
+		/*NeoForge.EVENT_BUS.addListener(ConfigSearch::onScreenRender);
+		*///?}
 	}
 
 	private static void onScreenInit(ScreenEvent.Init.Post event) {
@@ -41,6 +51,18 @@ public final class ConfigSearch {
 		if (searchBox == null) {
 			return;
 		}
+		Component tooltip = Component.translatable("configsearch.button.tooltip");
+		SpriteIconButton button = SpriteIconButton.builder(tooltip,
+				b -> Minecraft.getInstance()/*? if >= 26.2 {*//*.gui*//*?}*/.setScreen(new ConfigSearchScreen(screen)), true)
+			.size(BUTTON_SIZE, BUTTON_SIZE)
+			.sprite(/*? if >= 1.21.11 {*//*Identifier*//*?} else {*/ResourceLocation/*?}*/.fromNamespaceAndPath(MOD_ID, "search"), 16, 16)
+			.build();
+		button.setTooltip(Tooltip.create(tooltip));
+		//? if >= 26.3 {
+		/*searchBox.setWidth(searchBox.getWidth() - BUTTON_SIZE - GAP);
+		placeButton = () -> button.setPosition(searchBox.getX() + searchBox.getWidth() + GAP, searchBox.getY());
+		placeButton.run();
+		*///?} else {
 		Button configButton = findButtonBelow(event, searchBox);
 		if (configButton == null) {
 			return;
@@ -50,17 +72,18 @@ public final class ConfigSearch {
 			return;
 		}
 		configButton.setWidth(shrunk);
-
-		Component tooltip = Component.translatable("configsearch.button.tooltip");
-		SpriteIconButton button = SpriteIconButton.builder(tooltip,
-				b -> Minecraft.getInstance()/*? if >= 26.2 {*//*.gui*//*?}*/.setScreen(new ConfigSearchScreen(screen)), true)
-			.size(BUTTON_SIZE, BUTTON_SIZE)
-			.sprite(/*? if >= 1.21.11 {*//*Identifier*//*?} else {*/ResourceLocation/*?}*/.fromNamespaceAndPath(MOD_ID, "search"), 16, 16)
-			.build();
 		button.setPosition(configButton.getX() + shrunk + GAP, configButton.getY());
-		button.setTooltip(Tooltip.create(tooltip));
+		//?}
 		event.addListener(button);
 	}
+
+	//? if >= 26.3 {
+	/*private static void onScreenRender(ScreenEvent.Render.Pre event) {
+		if (placeButton != null && event.getScreen() instanceof ModListScreen) {
+			placeButton.run();
+		}
+	}
+	*///?}
 
 	private static EditBox findSearchBox(ScreenEvent.Init.Post event) {
 		for (GuiEventListener listener : event.getListenersList()) {
