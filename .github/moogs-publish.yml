@@ -61,18 +61,20 @@ targets:
       # on ONE JVM (the caller's javaVersion: '25'). The jar is unaffected: built
       # on 21 it still carries class-file major 61 and `"java": ">=17"`, verified
       # on the produced ConfigSearch-fabric-1.20.1-1.0.0.jar.
-      # (The forge branch is on Stonecutter 0.7.11 and does build 1.20.1 on 17.)
+      # The forge branch is on Stonecutter 0.9.6 too, so the same applies there.
       - { mc: "1.20.1",  java: 21 }
       - { mc: "1.21.1",  java: 21 }
       - { mc: "1.21.11", java: 21 }
       - { mc: "26.2",    java: 25 }
+      - { mc: "26.3",    java: 25 }
   - branch: forge
     loaders: [forge]
     buildCommand: ":{mc}:build"
     jarDir: "versions/{mc}/build/libs"
     builds:
-      - { mc: "1.20.1", java: 17 }
+      - { mc: "1.20.1", java: 21 }
       - { mc: "1.21.1", java: 21 }
+      - { mc: "26.3",   java: 25 }
   - branch: neoforge
     loaders: [neoforge]
     buildCommand: ":{mc}:build"
@@ -82,3 +84,4 @@ targets:
       - { mc: "1.21.11", java: 21 }
       - { mc: "26.1.2",  java: 25 }
       - { mc: "26.2",    java: 25 }
+      - { mc: "26.3",    java: 25 }
