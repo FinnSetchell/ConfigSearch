@@ -1,20 +1,49 @@
 plugins {
-	id 'net.minecraftforge.gradle' version "${forge_gradle_version}"
+	id 'java'
 	id 'maven-publish'
+	id 'net.minecraftforge.gradle' version "${forge_gradle_version}"
+	id 'net.minecraftforge.renamer' version "${forge_renamer_version}"
 }
+
+def mc = stonecutter.current.version
+def srgRuntime = stonecutter.eval(mc, '<1.20.5')
+def obfuscated = stonecutter.eval(mc, '<26.1')
 
 version = project.mod_version
 group = project.maven_group
 
 base {
-	archivesName = "${project.archives_base_name}-${project.branch_name}-${stonecutter.current.version}"
+	archivesName = "${project.archives_base_name}-${project.branch_name}-${mc}"
+}
+
+java {
+	withSourcesJar()
+	toolchain.languageVersion = JavaLanguageVersion.of(Integer.parseInt(project.java_version))
+}
+
+minecraft {
+	if (obfuscated) {
+		mappings channel: 'official', version: mc
+	}
+
+	runs {
+		configureEach {
+			workingDir.convention layout.projectDirectory.dir('run')
+		}
+		register('client')
+	}
+}
+
+sourceSets.each {
+	def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+	it.output.resourcesDir = dir
+	it.java.destinationDirectory = dir
 }
 
 repositories {
-	maven {
-		name = 'MinecraftForge'
-		url = 'https://maven.minecraftforge.net/'
-	}
+	minecraft.mavenizer(it)
+	maven fg.forgeMaven
+	maven fg.minecraftLibsMaven
 	maven {
 		name = 'shedaniel'
 		url = 'https://maven.shedaniel.me/'
@@ -29,55 +58,45 @@ repositories {
 	mavenCentral()
 }
 
-def useOfficialRuntime = !stonecutter.current.version.startsWith('1.20')
-
-minecraft {
-	mappings channel: 'official', version: stonecutter.current.version
-
-	if (useOfficialRuntime) {
-		reobf = false
-		copyIdeResources = true
-	}
-
-	runs {
-		client {
-			workingDirectory project.file('run')
-			property 'forge.logging.markers', 'REGISTRIES'
-			property 'forge.logging.console.level', 'debug'
-			mods {
-				configsearch {
-					source sourceSets.main
-				}
-			}
-		}
-	}
-}
-
-if (useOfficialRuntime) {
-	sourceSets.each {
-		def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
-		it.output.resourcesDir = dir
-		it.java.destinationDirectory = dir
-	}
+def modDependency = { String coords ->
+	srgRuntime ? renamer.dependency(coords) : coords
 }
 
 dependencies {
-	minecraft "net.minecraftforge:forge:${stonecutter.current.version}-${project.forge_version}"
+	implementation minecraft.dependency("net.minecraftforge:forge:${mc}-${project.forge_version}")
 
 	if (project.hasProperty('cloth_config_version') && project.cloth_config_version) {
-		compileOnly "me.shedaniel.cloth:cloth-config-forge:${project.cloth_config_version}"
-		runtimeOnly "me.shedaniel.cloth:cloth-config-forge:${project.cloth_config_version}"
+		def cloth = modDependency("me.shedaniel.cloth:cloth-config-forge:${project.cloth_config_version}")
+		compileOnly cloth
+		runtimeOnly cloth
 	}
 
 	if (project.hasProperty('configured_file_id') && project.configured_file_id) {
-		compileOnly "curse.maven:configured-457570:${project.configured_file_id}"
-		if (useOfficialRuntime) {
-			runtimeOnly "curse.maven:configured-457570:${project.configured_file_id}"
+		def configured = modDependency("curse.maven:configured-457570:${project.configured_file_id}")
+		compileOnly configured
+		if (!srgRuntime) {
+			runtimeOnly configured
 		}
 	}
 
 	if (project.hasProperty('night_config_version') && project.night_config_version) {
 		compileOnly "com.electronwill.night-config:core:${project.night_config_version}"
+	}
+}
+
+if (srgRuntime) {
+	renamer.mappings.from minecraft.dependency.toSrgFile
+
+	tasks.named('jar', Jar) {
+		archiveClassifier = 'dev'
+	}
+
+	renamer.classes(tasks.named('jar', Jar)) {
+		output = layout.buildDirectory.file("libs/${base.archivesName.get()}-${project.version}.jar")
+	}
+
+	tasks.named('assemble') {
+		dependsOn 'renameJar'
 	}
 }
 
@@ -102,14 +121,7 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = Integer.parseInt(project.java_version)
-}
-
-java {
-	withSourcesJar()
-
-	sourceCompatibility = JavaVersion.toVersion(project.java_version)
-	targetCompatibility = JavaVersion.toVersion(project.java_version)
+	it.options.encoding = 'UTF-8'
 }
 
 jar {
@@ -121,20 +133,10 @@ jar {
 	}
 }
 
-if (!useOfficialRuntime) {
-	reobf {
-		jar {}
-	}
-
-	tasks.named('jar').configure {
-		finalizedBy tasks.named('reobfJar')
-	}
-}
-
 publishing {
 	publications {
 		create('mavenJava', MavenPublication) {
-			artifact jar
+			from components.java
 		}
 	}
 
