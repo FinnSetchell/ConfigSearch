@@ -3,6 +3,7 @@ package dev.finndog.configsearch.gui;
 import dev.finndog.configsearch.api.ConfigOptionEntry;
 import dev.finndog.configsearch.index.OptionIndex;
 import dev.finndog.configsearch.index.SearchResult;
+import com.mojang.blaze3d.platform.InputConstants;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -11,7 +12,6 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 //? if >= 26.2 {
@@ -109,7 +109,7 @@ public final class ConfigSearchScreen extends Screen {
 		if (super.keyPressed(event)) {
 			return true;
 		}
-		if (event.key() == GLFW.GLFW_KEY_ENTER || event.key() == GLFW.GLFW_KEY_KP_ENTER) {
+		if (event.key() == InputConstants.KEY_RETURN || event.key() == InputConstants.KEY_NUMPADENTER) {
 			return this.activateFirst();
 		}
 		return false;
@@ -120,7 +120,7 @@ public final class ConfigSearchScreen extends Screen {
 		if (super.keyPressed(keyCode, scanCode, modifiers)) {
 			return true;
 		}
-		if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+		if (keyCode == InputConstants.KEY_RETURN || keyCode == InputConstants.KEY_NUMPADENTER) {
 			return this.activateFirst();
 		}
 		return false;
@@ -283,7 +283,7 @@ public final class ConfigSearchScreen extends Screen {
 		//? if >= 1.21.11 {
 		/*@Override
 		public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-			if (event.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+			if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
 				this.activate();
 				return true;
 			}
@@ -292,7 +292,7 @@ public final class ConfigSearchScreen extends Screen {
 		*///?} else {
 		@Override
 		public boolean mouseClicked(double mouseX, double mouseY, int button) {
-			if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+			if (button == InputConstants.MOUSE_BUTTON_LEFT) {
 				this.activate();
 				return true;
 			}
