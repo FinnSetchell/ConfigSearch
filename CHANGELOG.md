@@ -1,5 +1,10 @@
 # Config Search
 
+## [1.1.0] - 2026-09-26
+
+### Added
+- Support for Minecraft 26.3
+
 ## [1.0.0] - 2026-07-23
 
 First release.
