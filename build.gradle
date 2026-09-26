@@ -99,9 +99,11 @@ processResources {
 
 	def neoForgeVersionRange = project.neoforge_version_range
 	inputs.property 'neoForgeVersionRange', neoForgeVersionRange
+	def iconKey = stonecutter.eval(stonecutter.current.version, '>=26.3') ? 'iconFile' : 'logoFile'
+	inputs.property 'iconKey', iconKey
 
 	filesMatching('META-INF/neoforge.mods.toml') {
-		expand 'version': version, 'minecraftDep': minecraftDep, 'javaVersion': javaVersion, 'neoForgeVersionRange': neoForgeVersionRange
+		expand 'version': version, 'minecraftDep': minecraftDep, 'javaVersion': javaVersion, 'neoForgeVersionRange': neoForgeVersionRange, 'iconKey': iconKey
 	}
 }
 
