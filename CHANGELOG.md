@@ -4,6 +4,11 @@
 
 ### Added
 - Support for Minecraft 26.3
+- Works with Catalogue: the search button now shows in Catalogue's mod list
+- Configs that only show up in Catalogue can now be searched
+
+### Changed
+- Mod Menu is no longer required, you can use Catalogue instead
 
 ## [1.0.0] - 2026-07-23
 
