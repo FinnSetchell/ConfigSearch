@@ -4,6 +4,7 @@
 
 ### Added
 - Support for Minecraft 26.3
+- Works with Catalogue: the search button now shows in Catalogue's mod list
 
 ### Changed
 - On 26.3 the search button now sits next to the mod list's search box
