@@ -10,6 +10,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 //? if >= 1.21.11 {
 /*import net.minecraft.resources.Identifier;
 *///?} else {
@@ -29,6 +30,7 @@ import net.neoforged.neoforge.common.NeoForge;
 @Mod(value = ConfigSearch.MOD_ID, dist = Dist.CLIENT)
 public final class ConfigSearch {
 	public static final String MOD_ID = "configsearch";
+	private static final String CATALOGUE_SCREEN = "com.mrcrayfish.catalogue.client.screen.CatalogueModListScreen";
 	private static final int BUTTON_SIZE = 20;
 	private static final int GAP = 2;
 	//? if >= 26.3 {
@@ -44,20 +46,19 @@ public final class ConfigSearch {
 
 	private static void onScreenInit(ScreenEvent.Init.Post event) {
 		Screen screen = event.getScreen();
-		if (!(screen instanceof ModListScreen)) {
-			return;
+		if (screen.getClass().getName().equals(CATALOGUE_SCREEN)) {
+			addToCatalogue(event);
+		} else if (screen instanceof ModListScreen) {
+			addToModList(event);
 		}
+	}
+
+	private static void addToModList(ScreenEvent.Init.Post event) {
 		EditBox searchBox = findSearchBox(event);
 		if (searchBox == null) {
 			return;
 		}
-		Component tooltip = Component.translatable("configsearch.button.tooltip");
-		SpriteIconButton button = SpriteIconButton.builder(tooltip,
-				b -> Minecraft.getInstance()/*? if >= 26.2 {*//*.gui*//*?}*/.setScreen(new ConfigSearchScreen(screen)), true)
-			.size(BUTTON_SIZE, BUTTON_SIZE)
-			.sprite(/*? if >= 1.21.11 {*//*Identifier*//*?} else {*/ResourceLocation/*?}*/.fromNamespaceAndPath(MOD_ID, "search"), 16, 16)
-			.build();
-		button.setTooltip(Tooltip.create(tooltip));
+		Button button = createButton(event.getScreen());
 		//? if >= 26.3 {
 		/*searchBox.setWidth(searchBox.getWidth() - BUTTON_SIZE - GAP);
 		placeButton = () -> button.setPosition(searchBox.getX() + searchBox.getWidth() + GAP, searchBox.getY());
@@ -67,13 +68,21 @@ public final class ConfigSearch {
 		if (configButton == null) {
 			return;
 		}
-		int shrunk = configButton.getWidth() - BUTTON_SIZE - GAP;
-		if (shrunk < 40) {
+		if (!shrinkFor(configButton)) {
 			return;
 		}
-		configButton.setWidth(shrunk);
-		button.setPosition(configButton.getX() + shrunk + GAP, configButton.getY());
+		button.setPosition(configButton.getX() + configButton.getWidth() + GAP, configButton.getY());
 		//?}
+		event.addListener(button);
+	}
+
+	private static void addToCatalogue(ScreenEvent.Init.Post event) {
+		Button back = findButtonByKey(event, "gui.back");
+		if (back == null || !shrinkFor(back)) {
+			return;
+		}
+		Button button = createButton(event.getScreen());
+		button.setPosition(back.getX() + back.getWidth() + GAP, back.getY());
 		event.addListener(button);
 	}
 
@@ -85,10 +94,39 @@ public final class ConfigSearch {
 	}
 	*///?}
 
+	private static Button createButton(Screen screen) {
+		Component tooltip = Component.translatable("configsearch.button.tooltip");
+		SpriteIconButton button = SpriteIconButton.builder(tooltip,
+				b -> Minecraft.getInstance()/*? if >= 26.2 {*//*.gui*//*?}*/.setScreen(new ConfigSearchScreen(screen)), true)
+			.size(BUTTON_SIZE, BUTTON_SIZE)
+			.sprite(/*? if >= 1.21.11 {*//*Identifier*//*?} else {*/ResourceLocation/*?}*/.fromNamespaceAndPath(MOD_ID, "search"), 16, 16)
+			.build();
+		button.setTooltip(Tooltip.create(tooltip));
+		return button;
+	}
+
+	private static boolean shrinkFor(Button target) {
+		int shrunk = target.getWidth() - BUTTON_SIZE - GAP;
+		if (shrunk < 40) {
+			return false;
+		}
+		target.setWidth(shrunk);
+		return true;
+	}
+
 	private static EditBox findSearchBox(ScreenEvent.Init.Post event) {
 		for (GuiEventListener listener : event.getListenersList()) {
 			if (listener instanceof EditBox editBox) {
 				return editBox;
+			}
+		}
+		return null;
+	}
+
+	private static Button findButtonByKey(ScreenEvent.Init.Post event, String translationKey) {
+		for (GuiEventListener listener : event.getListenersList()) {
+			if (listener instanceof Button candidate && candidate.getMessage().getContents() instanceof TranslatableContents tc && translationKey.equals(tc.getKey())) {
+				return candidate;
 			}
 		}
 		return null;
