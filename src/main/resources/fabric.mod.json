@@ -3,7 +3,7 @@
 	"id": "configsearch",
 	"version": "${version}",
 	"name": "Config Search",
-	"description": "Search every mod's config options from one search bar in Mod Menu.",
+	"description": "Search every mod's config options from one search bar in Mod Menu or Catalogue.",
 	"authors": [
 		"FinnDog"
 	],
@@ -28,7 +28,15 @@
 		"fabricloader": ">=0.15.11",
 		"minecraft": "${minecraftDep}",
 		"java": ">=${javaVersion}",
-		"fabric-api": "*",
-		"modmenu": "*"
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"modmenu": "*",
+		"catalogue": "*"
+	},
+	"custom": {
+		"catalogue": {
+			"configFactory": "dev.finndog.configsearch.compat.CatalogueConfigFactory"
+		}
 	}
 }

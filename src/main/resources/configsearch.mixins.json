@@ -1,6 +1,7 @@
 {
 	"required": true,
 	"package": "dev.finndog.configsearch.mixin",
+	"plugin": "dev.finndog.configsearch.mixin.ConfigSearchMixinPlugin",
 	"compatibilityLevel": "JAVA_${javaVersion}",
 	"client": [
 		"ModsScreenMixin"

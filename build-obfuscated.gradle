@@ -57,6 +57,10 @@ dependencies {
 	modCompileOnly "maven.modrinth:midnightlib:${project.midnightlib_version}"
 	modLocalRuntime "maven.modrinth:midnightlib:${project.midnightlib_version}"
 
+	if (project.hasProperty('catalogue_file_id')) {
+		modLocalRuntime "curse.maven:catalogue-459701:${project.catalogue_file_id}"
+	}
+
 	if (project.fcap_version) {
 		modCompileOnly "maven.modrinth:forge-config-api-port:${project.fcap_version}"
 		modLocalRuntime "maven.modrinth:forge-config-api-port:${project.fcap_version}"

@@ -1,12 +1,13 @@
 package dev.finndog.configsearch.index;
 
-import com.terraformersmc.modmenu.api.ConfigScreenFactory;
-import com.terraformersmc.modmenu.api.ModMenuApi;
 import dev.finndog.configsearch.api.ConfigOptionEntry;
 import dev.finndog.configsearch.api.ConfigSearchEntrypoint;
 import dev.finndog.configsearch.api.ExtractionContext;
 import dev.finndog.configsearch.api.GlobalOptionProvider;
+import dev.finndog.configsearch.api.ScreenOpener;
 import dev.finndog.configsearch.api.ScreenOptionExtractor;
+import dev.finndog.configsearch.compat.CatalogueCompat;
+import dev.finndog.configsearch.compat.ModMenuFactories;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -118,55 +119,42 @@ public final class OptionIndex {
 		return new Registration(extractors, entriesByMod);
 	}
 
-	private Map<String, ConfigScreenFactory<?>> collectFactories() {
+	private Map<String, ScreenOpener> collectFactories() {
 		FabricLoader loader = FabricLoader.getInstance();
-		Map<String, ConfigScreenFactory<?>> factories = new LinkedHashMap<>();
-		Map<String, ConfigScreenFactory<?>> provided = new LinkedHashMap<>();
-		for (var container : loader.getEntrypointContainers("modmenu", ModMenuApi.class)) {
-			String providerId = container.getProvider().getMetadata().getId();
-			if (providerId.equals("configsearch")) {
-				continue;
-			}
-			try {
-				ModMenuApi api = container.getEntrypoint();
-				factories.putIfAbsent(providerId, api.getModConfigScreenFactory());
-				api.getProvidedConfigScreenFactories().forEach((targetId, factory) -> {
-					if (loader.isModLoaded(targetId)) {
-						provided.putIfAbsent(targetId, factory);
-					}
-				});
-			} catch (Throwable t) {
-				LOGGER.warn("Failed to read Mod Menu config screen factories from mod {}", providerId, t);
-			}
+		Map<String, ScreenOpener> factories = new LinkedHashMap<>();
+		if (loader.isModLoaded("modmenu")) {
+			factories.putAll(ModMenuFactories.collect());
 		}
-		provided.forEach(factories::putIfAbsent);
+		if (loader.isModLoaded("catalogue")) {
+			CatalogueCompat.collectFactories().forEach(factories::putIfAbsent);
+		}
 		return factories;
 	}
 
-	private List<ConfigOptionEntry> extractFromScreen(String modId, ConfigScreenFactory<?> factory, List<ScreenOptionExtractor> extractors) {
+	private List<ConfigOptionEntry> extractFromScreen(String modId, ScreenOpener opener, List<ScreenOptionExtractor> extractors) {
 		Optional<ModContainer> mod = FabricLoader.getInstance().getModContainer(modId);
 		if (mod.isEmpty()) {
 			return List.of();
 		}
 		try {
-			Screen screen = factory.create(throwawayParent());
+			Screen screen = opener.open(throwawayParent());
 			if (screen == null) {
 				return List.of();
 			}
-			ExtractionContext context = new ExtractionContext(mod.get(), screen, factory::create);
+			ExtractionContext context = new ExtractionContext(mod.get(), screen, opener);
 			for (ScreenOptionExtractor extractor : extractors) {
 				if (extractor.supports(screen)) {
 					return List.copyOf(extractor.extract(context));
 				}
 			}
-			return List.of(fallbackEntry(mod.get(), factory));
+			return List.of(fallbackEntry(mod.get(), opener));
 		} catch (Throwable t) {
 			LOGGER.warn("Failed to index config screen for mod {}", modId, t);
 			return List.of();
 		}
 	}
 
-	private static ConfigOptionEntry fallbackEntry(ModContainer mod, ConfigScreenFactory<?> factory) {
+	private static ConfigOptionEntry fallbackEntry(ModContainer mod, ScreenOpener opener) {
 		Component modName = Component.literal(mod.getMetadata().getName());
 		return new ConfigOptionEntry(
 			mod.getMetadata().getId(),
@@ -174,7 +162,7 @@ public final class OptionIndex {
 			List.of(),
 			modName,
 			Component.translatable("configsearch.result.screen_only"),
-			factory::create
+			opener
 		);
 	}
 
