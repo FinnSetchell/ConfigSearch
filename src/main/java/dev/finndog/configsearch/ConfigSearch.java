@@ -34,6 +34,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 @Mod(ConfigSearch.MOD_ID)
 public final class ConfigSearch {
 	public static final String MOD_ID = "configsearch";
+	private static final String CATALOGUE_SCREEN = "com.mrcrayfish.catalogue.client.screen.CatalogueModListScreen";
 	private static final int BUTTON_SIZE = 20;
 	private static final int GAP = 2;
 
@@ -53,10 +54,15 @@ public final class ConfigSearch {
 
 	private static void onScreenInit(ScreenEvent.Init.Post event) {
 		Screen screen = event.getScreen();
-		if (!(screen instanceof ModListScreen)) {
+		String anchorKey;
+		if (screen.getClass().getName().equals(CATALOGUE_SCREEN)) {
+			anchorKey = "gui.back";
+		} else if (screen instanceof ModListScreen) {
+			anchorKey = "fml.menu.mods.config";
+		} else {
 			return;
 		}
-		Button configButton = findButtonByKey(event, "fml.menu.mods.config");
+		Button configButton = findButtonByKey(event, anchorKey);
 		if (configButton == null) {
 			return;
 		}

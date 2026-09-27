@@ -79,6 +79,10 @@ dependencies {
 		}
 	}
 
+	if (project.hasProperty('catalogue_file_id') && project.catalogue_file_id) {
+		runtimeOnly modDependency("curse.maven:catalogue-459701:${project.catalogue_file_id}")
+	}
+
 	if (project.hasProperty('night_config_version') && project.night_config_version) {
 		compileOnly "com.electronwill.night-config:core:${project.night_config_version}"
 	}
