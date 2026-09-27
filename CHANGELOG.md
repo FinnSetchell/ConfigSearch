@@ -4,6 +4,7 @@
 
 ### Added
 - Support for Minecraft 26.3
+- Works with Catalogue: the search button now shows in Catalogue's mod list
 
 ## [1.0.0] - 2026-07-23
 
